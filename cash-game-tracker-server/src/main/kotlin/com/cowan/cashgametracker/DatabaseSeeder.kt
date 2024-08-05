@@ -9,6 +9,6 @@ class DatabaseSeeder(private val jdbcTemplate: JdbcTemplate) {
 
     @PostConstruct
     fun insertData() {
-        jdbcTemplate.execute("INSERT INTO account(name) VALUES('Cowan')")
+        jdbcTemplate.execute("INSERT INTO account(name, ID) VALUES('Cowan', 'Test1')")
     }
 }
