@@ -8,6 +8,7 @@ import com.cowan.cashgametracker.model.Game
 import com.cowan.cashgametracker.repository.GameRepository
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.time.Instant
 
 @Component
@@ -16,14 +17,7 @@ class GameService(private val gameRepo: GameRepository) {
     fun getGame(id: String): Game {
         val gameEntity = gameRepo.getById(id)
 
-        val game = Game(
-            EntityUtil.requireNotNullId(gameEntity.id),
-            gameEntity.createTime
-        )
-
-        gameEntity.buyIns.map { entityToBuyIn(it) }.forEach { game.addBuyIn(it) }
-
-        return game
+        return convertEntity(gameEntity)
     }
 
     @Transactional
@@ -37,12 +31,34 @@ class GameService(private val gameRepo: GameRepository) {
         return game
     }
 
-    private fun entityToBuyIn(buyInEntity: BuyInEntity): BuyIn {
+    @Transactional
+    fun addBuyIn(gameId: String, accountId: String, amount: BigDecimal): Game {
+        val gameEntity = gameRepo.getById(gameId)
+        val buyInEntity = BuyInEntity(accountId, amount, Instant.now())
+
+        gameEntity.buyIns.add(buyInEntity)
+
+        gameRepo.save(gameEntity)
+
+        return convertEntity(gameEntity)
+    }
+
+    private fun convertEntity(buyInEntity: BuyInEntity): BuyIn {
         return BuyIn(
             EntityUtil.requireNotNullId(buyInEntity.id),
             buyInEntity.accountId,
             buyInEntity.amount,
             buyInEntity.createTime
         )
+    }
+
+    private fun convertEntity(gameEntity: GameEntity): Game {
+        val game = Game(
+            EntityUtil.requireNotNullId(gameEntity.id),
+            gameEntity.createTime
+        )
+
+        gameEntity.buyIns.map { convertEntity(it) }.forEach { game.addBuyIn(it) }
+        return game
     }
 }

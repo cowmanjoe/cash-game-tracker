@@ -55,6 +55,8 @@ class JdbcConfig : AbstractJdbcConfiguration() {
                 game.id = EntityUtil.generateNewId()
             }
 
+            game.buyIns.filter { it.id == null }.forEach { it.id = EntityUtil.generateNewId() }
+
             game
         }
     }

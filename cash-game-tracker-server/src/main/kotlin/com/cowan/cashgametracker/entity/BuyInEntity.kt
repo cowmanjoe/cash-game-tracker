@@ -10,5 +10,5 @@ data class BuyInEntity(
     val accountId: String,
     val amount: BigDecimal,
     val createTime: Instant,
-    @Id var id: String?
+    @Id var id: String? = null
 )

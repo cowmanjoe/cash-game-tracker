@@ -6,8 +6,10 @@ import com.cowan.cashgametracker.service.GameService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.math.BigDecimal
 
 @RestController
 @RequestMapping("game")
@@ -21,6 +23,11 @@ class GameController(private val gameService: GameService) {
     @PostMapping
     fun createGame(): GameResponse {
         return GameResponse.fromGame(gameService.createGame())
+    }
+
+    @PostMapping("{id}/buy-in")
+    fun addBuyIn(@PathVariable("id") gameId: String, @RequestBody request: AddBuyInRequest): GameResponse {
+        return GameResponse.fromGame(gameService.addBuyIn(gameId, request.accountId, BigDecimal(request.amount)))
     }
 }
 
@@ -45,3 +52,5 @@ data class BuyInResponse(val id: String, val accountId: String, val amount: Stri
         }
     }
 }
+
+data class AddBuyInRequest(val accountId: String, val amount: String)
