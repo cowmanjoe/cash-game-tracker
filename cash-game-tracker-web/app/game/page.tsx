@@ -4,10 +4,17 @@ import { useRouter } from "next/navigation";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup"
 import Image from "next/image";
-import styles from "./page.module.css";
+import styles from "../page.module.css";
+import { useEffect } from 'react'
+import axios from "axios";
+import { Game } from "../lib/game";
 
 export default function Home() {
   const router = useRouter()
+  useEffect(() => {
+    axios.post("http://localhost:8080/game")
+      .then((game: Game) => console.log(game))
+  });
 
   return (
     <main className={styles.main}>
@@ -20,3 +27,4 @@ export default function Home() {
     </main>
   );
 }
+ 
