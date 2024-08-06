@@ -2,7 +2,9 @@ package com.cowan.cashgametracker.config
 
 import com.cowan.cashgametracker.entity.AccountEntity
 import com.cowan.cashgametracker.entity.EntityUtil
+import com.cowan.cashgametracker.entity.GameEntity
 import com.cowan.cashgametracker.model.Account
+import com.cowan.cashgametracker.model.Game
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration
@@ -43,6 +45,17 @@ class JdbcConfig : AbstractJdbcConfiguration() {
             }
 
             account
+        }
+    }
+
+    @Bean
+    fun gameBeforeConvertCallback(): BeforeConvertCallback<GameEntity> {
+        return BeforeConvertCallback<GameEntity> { game ->
+            if (game.id == null) {
+                game.id = EntityUtil.generateNewId()
+            }
+
+            game
         }
     }
 }

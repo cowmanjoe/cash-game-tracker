@@ -4,4 +4,11 @@ import java.time.Instant
 
 class Game(val id: String, val createTime: Instant) {
 
+    private val mutableBuyIns = mutableListOf<BuyIn>()
+
+    val buyIns: List<BuyIn> get() = mutableBuyIns
+
+    fun addBuyIn(buyIn: BuyIn) {
+        mutableBuyIns.add(buyIn)
+    }
 }
