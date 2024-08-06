@@ -40,11 +40,7 @@ class GameService(private val gameRepo: GameRepository) {
 
         gameRepo.save(gameEntity)
 
-        val game = convertEntity(gameEntity)
-
-        game.addBuyIn(convertEntity(buyInEntity))
-
-        return game
+        return convertEntity(gameEntity)
     }
 
     @Transactional
@@ -57,11 +53,7 @@ class GameService(private val gameRepo: GameRepository) {
 
         gameRepo.save(gameEntity)
 
-        val game = convertEntity(gameEntity)
-
-        game.applyCashOut(convertEntity(cashOutEntity))
-
-        return game
+        return convertEntity(gameEntity)
     }
 
     @Transactional
@@ -73,11 +65,7 @@ class GameService(private val gameRepo: GameRepository) {
 
         gameRepo.save(gameEntity)
 
-        val game = convertEntity(gameEntity)
-
-        game.addPayment(convertEntity(paymentEntity))
-
-        return game
+        return convertEntity(gameEntity)
     }
 
     private fun convertEntity(buyInEntity: BuyInEntity): BuyIn {
