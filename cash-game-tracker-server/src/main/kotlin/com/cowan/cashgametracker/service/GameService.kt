@@ -1,9 +1,11 @@
 package com.cowan.cashgametracker.service
 
 import com.cowan.cashgametracker.entity.BuyInEntity
+import com.cowan.cashgametracker.entity.CashOutEntity
 import com.cowan.cashgametracker.entity.EntityUtil
 import com.cowan.cashgametracker.entity.GameEntity
 import com.cowan.cashgametracker.model.BuyIn
+import com.cowan.cashgametracker.model.CashOut
 import com.cowan.cashgametracker.model.Game
 import com.cowan.cashgametracker.repository.GameRepository
 import org.springframework.stereotype.Component
@@ -22,7 +24,7 @@ class GameService(private val gameRepo: GameRepository) {
 
     @Transactional
     fun createGame(): Game {
-        val gameEntity = GameEntity(Instant.now(), mutableSetOf())
+        val gameEntity = GameEntity(Instant.now(), mutableSetOf(), mutableMapOf())
 
         gameRepo.save(gameEntity)
 
@@ -43,6 +45,23 @@ class GameService(private val gameRepo: GameRepository) {
         return convertEntity(gameEntity)
     }
 
+    @Transactional
+    fun updateCashOut(gameId: String, accountId: String, amount: BigDecimal): Game {
+        val gameEntity = gameRepo.getById(gameId)
+
+        val cashOutEntity = gameEntity.cashOuts[accountId] ?: CashOutEntity(accountId, amount, Instant.now())
+
+        cashOutEntity.amount = amount
+
+        gameRepo.save(gameEntity)
+
+        val game = convertEntity(gameEntity)
+
+        game.applyCashOut(convertEntity(cashOutEntity))
+
+        return game
+    }
+
     private fun convertEntity(buyInEntity: BuyInEntity): BuyIn {
         return BuyIn(
             EntityUtil.requireNotNullId(buyInEntity.id),
@@ -60,5 +79,13 @@ class GameService(private val gameRepo: GameRepository) {
 
         gameEntity.buyIns.map { convertEntity(it) }.forEach { game.addBuyIn(it) }
         return game
+    }
+
+    private fun convertEntity(cashOutEntity: CashOutEntity): CashOut {
+        return CashOut(
+            cashOutEntity.accountId,
+            cashOutEntity.amount,
+            cashOutEntity.createTime
+        )
     }
 }

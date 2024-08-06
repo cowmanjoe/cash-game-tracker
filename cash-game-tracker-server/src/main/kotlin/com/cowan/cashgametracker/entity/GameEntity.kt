@@ -10,5 +10,7 @@ data class GameEntity(
     val createTime: Instant,
     @MappedCollection(idColumn = "GAME_ID")
     val buyIns: MutableSet<BuyInEntity>,
+    @MappedCollection(idColumn = "GAME_ID", keyColumn = "ACCOUNT_ID")
+    val cashOuts: MutableMap<String, CashOutEntity>,
     @Id var id: String? = null
 )
