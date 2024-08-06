@@ -1,6 +1,10 @@
 package com.cowan.cashgametracker.service
 
-import com.cowan.cashgametracker.entity.*
+import com.cowan.cashgametracker.entity.BuyInEntity
+import com.cowan.cashgametracker.entity.CashOutEntity
+import com.cowan.cashgametracker.entity.EntityUtil
+import com.cowan.cashgametracker.entity.GameEntity
+import com.cowan.cashgametracker.entity.PaymentEntity
 import com.cowan.cashgametracker.model.BuyIn
 import com.cowan.cashgametracker.model.CashOut
 import com.cowan.cashgametracker.model.Game
@@ -50,6 +54,8 @@ class GameService(private val gameRepo: GameRepository) {
         val cashOutEntity = gameEntity.cashOuts[accountId] ?: CashOutEntity(accountId, amount, Instant.now())
 
         cashOutEntity.amount = amount
+
+        gameEntity.cashOuts[cashOutEntity.accountId] = cashOutEntity
 
         gameRepo.save(gameEntity)
 

@@ -1,6 +1,6 @@
 package com.cowan.cashgametracker.entity
 
-import java.util.*
+import java.util.UUID
 
 object EntityUtil {
     fun generateNewId(): String = UUID.randomUUID().toString()
