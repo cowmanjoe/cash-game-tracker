@@ -1,12 +1,10 @@
 package com.cowan.cashgametracker.service
 
-import com.cowan.cashgametracker.entity.BuyInEntity
-import com.cowan.cashgametracker.entity.CashOutEntity
-import com.cowan.cashgametracker.entity.EntityUtil
-import com.cowan.cashgametracker.entity.GameEntity
+import com.cowan.cashgametracker.entity.*
 import com.cowan.cashgametracker.model.BuyIn
 import com.cowan.cashgametracker.model.CashOut
 import com.cowan.cashgametracker.model.Game
+import com.cowan.cashgametracker.model.Payment
 import com.cowan.cashgametracker.repository.GameRepository
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -24,7 +22,7 @@ class GameService(private val gameRepo: GameRepository) {
 
     @Transactional
     fun createGame(): Game {
-        val gameEntity = GameEntity(Instant.now(), mutableSetOf(), mutableMapOf())
+        val gameEntity = GameEntity(Instant.now())
 
         gameRepo.save(gameEntity)
 
@@ -42,7 +40,11 @@ class GameService(private val gameRepo: GameRepository) {
 
         gameRepo.save(gameEntity)
 
-        return convertEntity(gameEntity)
+        val game = convertEntity(gameEntity)
+
+        game.addBuyIn(convertEntity(buyInEntity))
+
+        return game
     }
 
     @Transactional
@@ -58,6 +60,22 @@ class GameService(private val gameRepo: GameRepository) {
         val game = convertEntity(gameEntity)
 
         game.applyCashOut(convertEntity(cashOutEntity))
+
+        return game
+    }
+
+    @Transactional
+    fun addPayment(gameId: String, accountId: String, amount: BigDecimal, side: Payment.Side): Game {
+        val gameEntity = gameRepo.getById(gameId)
+        val paymentEntity = PaymentEntity(accountId, amount, Instant.now(), side)
+
+        gameEntity.payments.add(paymentEntity)
+
+        gameRepo.save(gameEntity)
+
+        val game = convertEntity(gameEntity)
+
+        game.addPayment(convertEntity(paymentEntity))
 
         return game
     }
@@ -78,6 +96,8 @@ class GameService(private val gameRepo: GameRepository) {
         )
 
         gameEntity.buyIns.map { convertEntity(it) }.forEach { game.addBuyIn(it) }
+        gameEntity.cashOuts.values.map { convertEntity(it) }.forEach { game.applyCashOut(it) }
+        gameEntity.payments.map { convertEntity(it) }.forEach { game.addPayment(it) }
         return game
     }
 
@@ -86,6 +106,16 @@ class GameService(private val gameRepo: GameRepository) {
             cashOutEntity.accountId,
             cashOutEntity.amount,
             cashOutEntity.createTime
+        )
+    }
+
+    private fun convertEntity(paymentEntity: PaymentEntity): Payment {
+        return Payment(
+            EntityUtil.requireNotNullId(paymentEntity.id),
+            paymentEntity.accountId,
+            paymentEntity.amount,
+            paymentEntity.createTime,
+            paymentEntity.side
         )
     }
 }

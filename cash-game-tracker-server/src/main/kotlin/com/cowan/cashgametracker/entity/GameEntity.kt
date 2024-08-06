@@ -9,8 +9,10 @@ import java.time.Instant
 data class GameEntity(
     val createTime: Instant,
     @MappedCollection(idColumn = "GAME_ID")
-    val buyIns: MutableSet<BuyInEntity>,
+    val buyIns: MutableSet<BuyInEntity> = mutableSetOf(),
     @MappedCollection(idColumn = "GAME_ID", keyColumn = "ACCOUNT_ID")
-    val cashOuts: MutableMap<String, CashOutEntity>,
+    val cashOuts: MutableMap<String, CashOutEntity> = mutableMapOf(),
+    @MappedCollection(idColumn = "GAME_ID")
+    val payments: MutableSet<PaymentEntity> = mutableSetOf(),
     @Id var id: String? = null
 )

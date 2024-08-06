@@ -3,6 +3,7 @@ package com.cowan.cashgametracker.controller
 import com.cowan.cashgametracker.model.BuyIn
 import com.cowan.cashgametracker.model.CashOut
 import com.cowan.cashgametracker.model.Game
+import com.cowan.cashgametracker.model.Payment
 import com.cowan.cashgametracker.service.GameService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -36,13 +37,21 @@ class GameController(private val gameService: GameService) {
     fun updateCashOut(@PathVariable("id") gameId: String, @RequestBody request: UpdateCashOutRequest): GameResponse {
         return GameResponse.fromGame(gameService.updateCashOut(gameId, request.accountId, BigDecimal(request.amount)))
     }
+
+    @PostMapping("{id}/payment")
+    fun addPayment(@PathVariable("id") gameId: String, @RequestBody request: AddPaymentRequest): GameResponse {
+        return GameResponse.fromGame(
+            gameService.addPayment(gameId, request.accountId, BigDecimal(request.amount), request.side)
+        )
+    }
 }
 
 data class GameResponse(
     val id: String,
     val createTime: Long,
     val buyIns: List<BuyInResponse>,
-    val cashOuts: Map<String, CashOutResponse>
+    val cashOuts: Map<String, CashOutResponse>,
+    val payments: List<PaymentResponse>
 ) {
 
     companion object {
@@ -51,7 +60,8 @@ data class GameResponse(
                 game.id,
                 game.createTime.toEpochMilli(),
                 game.buyIns.map(BuyInResponse::fromBuyIn),
-                game.cashOutsByAccountId.mapValues { (_, cashOut) -> CashOutResponse.fromCashOut(cashOut) }
+                game.cashOutsByAccountId.mapValues { (_, cashOut) -> CashOutResponse.fromCashOut(cashOut) },
+                game.payments.map(PaymentResponse::fromPayment)
             )
         }
     }
@@ -78,6 +88,28 @@ data class CashOutResponse(val amount: String, val time: Long) {
     companion object {
         fun fromCashOut(cashOut: CashOut): CashOutResponse {
             return CashOutResponse(cashOut.amount.toPlainString(), cashOut.createTime.toEpochMilli())
+        }
+    }
+}
+
+data class AddPaymentRequest(val accountId: String, val amount: String, val side: Payment.Side)
+
+data class PaymentResponse(
+    val id: String,
+    val accountId: String,
+    val amount: String,
+    val time: Long,
+    val side: String
+) {
+    companion object {
+        fun fromPayment(payment: Payment): PaymentResponse {
+            return PaymentResponse(
+                payment.id,
+                payment.accountId,
+                payment.amount.toPlainString(),
+                payment.createTime.toEpochMilli(),
+                payment.side.toString()
+            )
         }
     }
 }
