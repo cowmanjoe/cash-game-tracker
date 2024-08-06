@@ -38,6 +38,11 @@ class GameService(private val gameRepo: GameRepository) {
     }
 
     private fun entityToBuyIn(buyInEntity: BuyInEntity): BuyIn {
-        return BuyIn(EntityUtil.requireNotNullId(buyInEntity.id), buyInEntity.accountId, buyInEntity.amount)
+        return BuyIn(
+            EntityUtil.requireNotNullId(buyInEntity.id),
+            buyInEntity.accountId,
+            buyInEntity.amount,
+            buyInEntity.createTime
+        )
     }
 }

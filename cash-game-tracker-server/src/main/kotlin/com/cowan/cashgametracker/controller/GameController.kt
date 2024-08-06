@@ -33,10 +33,15 @@ data class GameResponse(val id: String, val createTime: Long, val buyIn: List<Bu
     }
 }
 
-data class BuyInResponse(val id: String, val accountId: String, val amount: String) {
+data class BuyInResponse(val id: String, val accountId: String, val amount: String, val time: Long) {
     companion object {
         fun fromBuyIn(buyIn: BuyIn): BuyInResponse {
-            return BuyInResponse(buyIn.id, buyIn.accountId, buyIn.amount.toPlainString())
+            return BuyInResponse(
+                buyIn.id,
+                buyIn.accountId,
+                buyIn.amount.toPlainString(),
+                buyIn.createTime.toEpochMilli()
+            )
         }
     }
 }
