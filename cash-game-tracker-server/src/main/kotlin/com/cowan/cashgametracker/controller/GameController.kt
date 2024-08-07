@@ -16,7 +16,7 @@ import java.math.BigDecimal
 
 @RestController
 @RequestMapping("game")
-class GameController(private val gameService: GameService) {
+class GameController(private val gameService: GameService) : BaseController() {
 
     @GetMapping("{id}")
     fun getGame(@PathVariable("id") id: String): GameResponse {

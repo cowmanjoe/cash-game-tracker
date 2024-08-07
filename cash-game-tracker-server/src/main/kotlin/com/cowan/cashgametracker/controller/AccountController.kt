@@ -1,7 +1,7 @@
 package com.cowan.cashgametracker.controller
 
-import com.cowan.cashgametracker.service.AccountService
 import com.cowan.cashgametracker.model.Account
+import com.cowan.cashgametracker.service.AccountService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("account")
-class AccountController(private val accountService: AccountService) {
+class AccountController(private val accountService: AccountService) : BaseController() {
 
     @GetMapping("{id}")
     fun getAccount(@PathVariable("id") id: String): AccountResponse {
