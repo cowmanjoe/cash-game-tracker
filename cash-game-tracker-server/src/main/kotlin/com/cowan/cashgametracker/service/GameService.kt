@@ -31,9 +31,7 @@ class GameService(private val gameRepo: GameRepository, private val accountServi
 
         gameRepo.save(gameEntity)
 
-        val game = Game(EntityUtil.requireNotNullId(gameEntity.id), gameEntity.createTime)
-
-        return game
+        return convertEntity(gameEntity)
     }
 
     @Transactional
@@ -69,6 +67,18 @@ class GameService(private val gameRepo: GameRepository, private val accountServi
         val paymentEntity = PaymentEntity(accountId, amount, Instant.now(), side)
 
         gameEntity.payments.add(paymentEntity)
+
+        gameRepo.save(gameEntity)
+
+        return convertEntity(gameEntity)
+    }
+
+    @Transactional
+    fun addPlayer(gameId: String, accountId: String): Game {
+        val player = accountService.getAccount(accountId)
+        val gameEntity = gameRepo.getById(gameId)
+
+        gameEntity.players.add(GamePlayerEntity(player.id))
 
         gameRepo.save(gameEntity)
 
@@ -113,14 +123,5 @@ class GameService(private val gameRepo: GameRepository, private val accountServi
             paymentEntity.createTime,
             paymentEntity.side
         )
-    }
-
-    fun addPlayer(gameId: String, accountId: String): Game {
-        val player = accountService.getAccount(accountId)
-        val gameEntity = gameRepo.getById(gameId)
-
-        gameEntity.players.add(GamePlayerEntity(player.id))
-
-        return convertEntity(gameEntity)
     }
 }
