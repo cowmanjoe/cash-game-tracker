@@ -6,23 +6,34 @@ import ButtonGroup from "@mui/material/ButtonGroup"
 import Image from "next/image";
 import styles from "../page.module.css";
 import { useEffect } from 'react'
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { Game } from "../lib/game";
+import { useGameContext } from "../context/game-context";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
 
 export default function Home() {
   const router = useRouter()
-  useEffect(() => {
-    axios.post("http://localhost:8080/game")
-      .then((game: Game) => console.log(game))
-  });
+  const [game, setGame] = useGameContext()
+
+  if (!game) {
+    // router.back();
+
+    return null;
+  }
 
   return (
     <main className={styles.main}>
       <div className={styles.description}>
-        <ButtonGroup variant="contained">
-          <Button variant="contained" onClick={() => router.push('/game')}>Host Game</Button>
-          <Button variant="contained">Join Game</Button>
-        </ButtonGroup>
+        <List>
+          {
+            game.buyIns.map(buyIn => (
+              <ListItem>
+                {buyIn.accountId}: ${buyIn.amount}
+              </ListItem>
+            ))
+          }
+        </List>
       </div>
     </main>
   );
