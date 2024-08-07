@@ -4,6 +4,7 @@ import com.cowan.cashgametracker.entity.BuyInEntity
 import com.cowan.cashgametracker.entity.CashOutEntity
 import com.cowan.cashgametracker.entity.EntityUtil
 import com.cowan.cashgametracker.entity.GameEntity
+import com.cowan.cashgametracker.entity.GamePlayerEntity
 import com.cowan.cashgametracker.entity.PaymentEntity
 import com.cowan.cashgametracker.model.BuyIn
 import com.cowan.cashgametracker.model.CashOut
@@ -16,7 +17,7 @@ import java.math.BigDecimal
 import java.time.Instant
 
 @Component
-class GameService(private val gameRepo: GameRepository) {
+class GameService(private val gameRepo: GameRepository, private val accountService: AccountService) {
 
     fun getGame(id: String): Game {
         val gameEntity = gameRepo.getById(id)
@@ -89,6 +90,7 @@ class GameService(private val gameRepo: GameRepository) {
             gameEntity.createTime
         )
 
+        gameEntity.players.map { it.accountId }.forEach { game.addPlayer(it) }
         gameEntity.buyIns.map { convertEntity(it) }.forEach { game.addBuyIn(it) }
         gameEntity.cashOuts.values.map { convertEntity(it) }.forEach { game.applyCashOut(it) }
         gameEntity.payments.map { convertEntity(it) }.forEach { game.addPayment(it) }
@@ -111,5 +113,14 @@ class GameService(private val gameRepo: GameRepository) {
             paymentEntity.createTime,
             paymentEntity.side
         )
+    }
+
+    fun addPlayer(gameId: String, accountId: String): Game {
+        val player = accountService.getAccount(accountId)
+        val gameEntity = gameRepo.getById(gameId)
+
+        gameEntity.players.add(GamePlayerEntity(player.id))
+
+        return convertEntity(gameEntity)
     }
 }

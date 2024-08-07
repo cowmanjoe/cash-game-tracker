@@ -14,5 +14,7 @@ data class GameEntity(
     val cashOuts: MutableMap<String, CashOutEntity> = mutableMapOf(),
     @MappedCollection(idColumn = "GAME_ID")
     val payments: MutableSet<PaymentEntity> = mutableSetOf(),
+    @MappedCollection(idColumn = "GAME_ID")
+    val players: MutableSet<GamePlayerEntity> = mutableSetOf(),
     @Id var id: String? = null
 )

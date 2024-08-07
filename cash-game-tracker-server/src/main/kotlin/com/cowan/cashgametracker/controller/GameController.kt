@@ -44,6 +44,11 @@ class GameController(private val gameService: GameService) : BaseController() {
             gameService.addPayment(gameId, request.accountId, BigDecimal(request.amount), request.side)
         )
     }
+
+    @PostMapping("{id}/add-player/{playerId}")
+    fun addPlayer(@PathVariable("id") gameId: String, @PathVariable("playerId") playerId: String): GameResponse {
+        return GameResponse.fromGame(gameService.addPlayer(gameId, playerId))
+    }
 }
 
 data class GameResponse(
