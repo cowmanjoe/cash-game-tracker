@@ -1,13 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { Game } from './app/lib/game';
+import { gameClient } from './app/lib/game-client';
 
 export async function middleware(request: NextRequest) {
-    const gameResponse = await fetch('http://localhost:8080/game', {
-        method: 'POST'
-    });
-
-    const game: Game = await gameResponse.json();
+    const game: Game = await gameClient.createGame();
 
     return NextResponse.redirect(new URL(`/game/${game.id}`, request.url));
 }

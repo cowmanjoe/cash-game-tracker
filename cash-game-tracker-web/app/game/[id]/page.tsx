@@ -7,9 +7,10 @@ import Button from "@mui/material/Button";
 import { revalidateTag } from 'next/cache';
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
+import { gameClient } from "@/app/lib/game-client";
 
 export default async function Home(props: { params: Record<string, string>}) {
-  const game: Game = await fetch(`http://localhost:8080/game/${props.params.id}`, { next: { tags: ['game'] } }).then(res => res.json())
+  const game: Game = await gameClient.getGame(props.params.id)
 
   console.log(JSON.stringify(game))
 
@@ -18,29 +19,17 @@ export default async function Home(props: { params: Record<string, string>}) {
     console.log('addBuyIn')
 
     const amount = formData.get('amount');
+
+    if (amount === null) {
+      throw Error("Amount was null");
+    }
     console.log(`amount: ${amount}`)
 
     try {
-      const response = await fetch(`http://localhost:8080/game/${props.params.id}/buy-in`, {
-        method: 'POST',
-        body: JSON.stringify({
-          accountId: 'Account1',
-          amount
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.status >= 400) {
-        console.error(`Got a bad response: ${await response.text()}`)
-      } else {
-        revalidateTag('game');
-      }
+      await gameClient.addBuyIn(game.id, 'Account1', amount.toString());
     } catch(e) {
       console.error(e)
     }
-
   }
 
   return (
