@@ -1,19 +1,25 @@
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup"
-import Image from "next/image";
 import styles from "./page.module.css";
-import axios from "axios";
-import Link from "next/link";
+import Container from "@mui/material/Container";
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
+import Link from "@mui/material/Link";
+import Box from "@mui/material/Box";
 
-export default async function Home() {
+export default function Home() {
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <ButtonGroup variant="contained">
-          <Link href="/game"><Button variant="contained">Host Game</Button></Link>
-          <Button variant="contained">Join Game</Button>
-        </ButtonGroup>
-      </div>
-    </main>
+    <Container>
+      <Box
+        sx={{
+          my: 4,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Link href="/game"><Button variant="contained">Host Game</Button></Link>
+        <Button variant="contained">Join Game</Button>
+      </Box>
+    </Container>
   );
 }
