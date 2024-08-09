@@ -15,12 +15,8 @@ class GameClientImpl implements GameClient {
     return this.sendRequest(`/game/${id}`, { next: { tags: ['game'] } })
   }
 
-  async createGame(): Promise<Game> {
-    const game = this.sendRequest(`/game`, { method: 'POST', next: { tags: ['game'] } })
-
-    revalidateTag('game');
-
-    return game;
+  createGame(): Promise<Game> {
+    return this.sendRequest(`/game`, { method: 'POST' })
   }
 
   async addBuyIn(gameId: string, accountId: string, amount: string): Promise<Game> {

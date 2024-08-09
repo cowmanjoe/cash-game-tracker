@@ -1,0 +1,4 @@
+.formGrid {
+  display: flex;
+  flex-direction: column;
+}

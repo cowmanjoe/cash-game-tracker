@@ -1,12 +1,10 @@
-import styles from "../page.module.css";
+import { Game } from "../lib/game";
+import { gameClient } from "../lib/game-client";
+import { redirect } from 'next/navigation'
 
 export default async function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        Loading...
-      </div>
-    </main>
-  );
+  const game: Game = await gameClient.createGame();
+
+  redirect(`/game/${game.id}`);
 }
  
