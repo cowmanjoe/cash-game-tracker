@@ -1,9 +1,8 @@
-import Container from "@mui/material/Container";
 
 export default async function Home() {
   return (
-    <Container>
+    <main>
         Loading...
-    </Container>
+    </main>
   );
 }
