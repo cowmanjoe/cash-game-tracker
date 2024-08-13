@@ -2,7 +2,7 @@ import { Game } from "@/app/lib/game";
 import { gameClient } from "@/app/lib/game-client";
 import Link from "next/link";
 
-export default async function Home(props: { params: Record<string, string> }) {
+export default async function Home(props: { params: { id: string } }) {
   const game: Game = await gameClient.getGame(props.params.id)
 
   console.log(JSON.stringify(game))

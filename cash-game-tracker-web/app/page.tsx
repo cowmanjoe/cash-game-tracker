@@ -8,19 +8,11 @@ function Button(props: { href: string, label: string }) {
   )
 }
 
-function DummyButton(props: { href: string, label: string }) {
-  return (
-    <div className="self-center">
-      {props.label}
-    </div>
-  );
-}
-
 export default function Home() {
   return (
     <main className="flex min-h-screen justify-center">
       <div className="flex flex-col gap-2 justify-center">
-        <Button href="/game" label="Host Game" />
+        <Button href="/new-game" label="Host Game" />
         <Button href="/join-game" label="Join Game" />
       </div>
     </main>

@@ -5,6 +5,7 @@ export interface GameClient {
   getGame(id: string): Promise<Game>;
   createGame(): Promise<Game>;
   addBuyIn(gameId: string, accountId: string, amount: string): Promise<Game>;
+  addPlayer(gameId: string, accountId: string): Promise<Game>;
 }
 
 class GameClientImpl implements GameClient {
@@ -34,6 +35,10 @@ class GameClientImpl implements GameClient {
     revalidateTag('game');
 
     return game;
+  }
+
+  addPlayer(gameId: string, accountId: string): Promise<Game> {
+    return this.sendRequest(`/game/${gameId}/add-player/${accountId}`, { method: 'POST' })
   }
 
   private async sendRequest(path: string, init?: RequestInit) {
