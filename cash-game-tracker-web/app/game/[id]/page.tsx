@@ -1,6 +1,8 @@
 import { Game } from "@/app/lib/game";
 import { gameClient } from "@/app/lib/game-client";
+import { decrypt, getSession } from "@/app/lib/session";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function Home(props: { params: { id: string } }) {
   const game: Game = await gameClient.getGame(props.params.id)
@@ -9,7 +11,13 @@ export default async function Home(props: { params: { id: string } }) {
 
   async function addBuyIn(formData: FormData) {
     'use server';
-    console.log('addBuyIn')
+    const sessionPayload = await getSession();
+
+    if (!sessionPayload) {
+      redirect('/');
+    }
+
+    console.log(`addBuyIn from ${sessionPayload?.accountId}`)
 
     const amount = formData.get('amount');
 
@@ -19,7 +27,7 @@ export default async function Home(props: { params: { id: string } }) {
     console.log(`amount: ${amount}`)
 
     try {
-      await gameClient.addBuyIn(game.id, 'Account1', amount.toString());
+      await gameClient.addBuyIn(game.id, sessionPayload?.accountId, amount.toString());
     } catch (e) {
       console.error(e)
     }

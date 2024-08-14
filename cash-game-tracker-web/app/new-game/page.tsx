@@ -2,6 +2,7 @@ import { redirect, RedirectType } from "next/navigation";
 import { accountClient } from "../lib/account-client";
 import { gameClient } from "../lib/game-client";
 import { Game } from "../lib/game";
+import { createSession } from "../lib/session";
 
 export default async function NewGame() {
   async function createGame(formData: FormData) {
@@ -18,11 +19,14 @@ export default async function NewGame() {
       game = await gameClient.createGame();
       const player = await accountClient.createAccount(name.toString());
 
-      gameClient.addPlayer(game.id, player.id);
+      await createSession(player.id);
+
+      game = await gameClient.addPlayer(game.id, player.id);
     } catch (e) {
       console.error(e);
+      game = null;
     }
-    
+
     if (game) {
       redirect(`/game/${game.id}`);
     }
