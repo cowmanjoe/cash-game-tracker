@@ -7,7 +7,7 @@ class Game(val id: String, val createTime: Instant) {
     private val mutableBuyIns = mutableListOf<BuyIn>()
     private val mutableCashOuts = mutableMapOf<String, CashOut>()
     private val mutablePayments = mutableListOf<Payment>()
-    private val mutablePlayers = mutableSetOf<String>()
+    private val mutablePlayers = mutableMapOf<String, Account>()
 
     val buyIns get() = mutableBuyIns.sortedByDescending { it.createTime }
     val cashOutsByAccountId get() = mutableCashOuts
@@ -32,8 +32,8 @@ class Game(val id: String, val createTime: Instant) {
         mutablePayments.add(payment)
     }
 
-    fun addPlayer(accountId: String) {
-        mutablePlayers.add(accountId)
+    fun addPlayer(player: Account) {
+        mutablePlayers[player.id] = player
     }
 
     private fun requirePlayerInGame(accountId: String) {

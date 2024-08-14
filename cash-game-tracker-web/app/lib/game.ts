@@ -1,4 +1,4 @@
-import { LoadingModuleData } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { Account } from "./account";
 
 export interface Game {
   id: string;
@@ -6,6 +6,7 @@ export interface Game {
   buyIns: BuyIn[];
   cashOuts: Record<string, CashOut>;
   payments: Payment[];
+  players: Record<string, Account>;
 }
 
 export interface BuyIn {

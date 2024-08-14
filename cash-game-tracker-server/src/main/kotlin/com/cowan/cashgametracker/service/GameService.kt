@@ -100,7 +100,7 @@ class GameService(private val gameRepo: GameRepository, private val accountServi
             gameEntity.createTime
         )
 
-        gameEntity.players.map { it.accountId }.forEach { game.addPlayer(it) }
+        gameEntity.players.map { accountService.getAccount(it.accountId) }.forEach { game.addPlayer(it) }
         gameEntity.buyIns.map { convertEntity(it) }.forEach { game.addBuyIn(it) }
         gameEntity.cashOuts.values.map { convertEntity(it) }.forEach { game.applyCashOut(it) }
         gameEntity.payments.map { convertEntity(it) }.forEach { game.addPayment(it) }

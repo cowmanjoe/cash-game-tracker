@@ -56,7 +56,8 @@ data class GameResponse(
     val createTime: Long,
     val buyIns: List<BuyInResponse>,
     val cashOuts: Map<String, CashOutResponse>,
-    val payments: List<PaymentResponse>
+    val payments: List<PaymentResponse>,
+    val players: Map<String, AccountResponse>
 ) {
 
     companion object {
@@ -66,7 +67,8 @@ data class GameResponse(
                 game.createTime.toEpochMilli(),
                 game.buyIns.map(BuyInResponse::fromBuyIn),
                 game.cashOutsByAccountId.mapValues { (_, cashOut) -> CashOutResponse.fromCashOut(cashOut) },
-                game.payments.map(PaymentResponse::fromPayment)
+                game.payments.map(PaymentResponse::fromPayment),
+                game.players.mapValues { (_, player) -> AccountResponse(player.id, player.name) }
             )
         }
     }

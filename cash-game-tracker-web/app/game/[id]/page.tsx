@@ -9,9 +9,14 @@ export default async function Home(props: { params: { id: string } }) {
 
   console.log(JSON.stringify(game))
 
+  const sessionPayload = await getSession();
+
+  if (!sessionPayload) {
+    redirect('/');
+  }
+
   async function addBuyIn(formData: FormData) {
     'use server';
-    const sessionPayload = await getSession();
 
     if (!sessionPayload) {
       redirect('/');
@@ -27,7 +32,7 @@ export default async function Home(props: { params: { id: string } }) {
     console.log(`amount: ${amount}`)
 
     try {
-      await gameClient.addBuyIn(game.id, sessionPayload?.accountId, amount.toString());
+      await gameClient.addBuyIn(game.id, sessionPayload.accountId, amount.toString());
     } catch (e) {
       console.error(e)
     }
@@ -61,7 +66,7 @@ export default async function Home(props: { params: { id: string } }) {
               <div key={buyIn.id}>
                 <Link href={`/game/${game.id}/buy-in/${buyIn.id}`} className="flex justify-between h-10 align-center mx-5">
                   <span className="content-center">
-                    {buyIn.accountId}
+                    {game.players[sessionPayload.accountId].name}
                   </span>
                   <span className="content-center">
                     {buyIn.amount}
