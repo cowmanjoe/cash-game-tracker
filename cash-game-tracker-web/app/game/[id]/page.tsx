@@ -4,7 +4,7 @@ import { decrypt, getSession } from "@/app/lib/session";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export default async function Home(props: { params: { id: string } }) {
+export default async function GamePage(props: { params: { id: string } }) {
   const game: Game = await gameClient.getGame(props.params.id)
 
   console.log(JSON.stringify(game))
@@ -66,7 +66,7 @@ export default async function Home(props: { params: { id: string } }) {
               <div key={buyIn.id}>
                 <Link href={`/game/${game.id}/buy-in/${buyIn.id}`} className="flex justify-between h-10 align-center mx-5">
                   <span className="content-center">
-                    {game.players[sessionPayload.accountId].name}
+                    {game.players[buyIn.accountId].name}
                   </span>
                   <span className="content-center">
                     {buyIn.amount}
