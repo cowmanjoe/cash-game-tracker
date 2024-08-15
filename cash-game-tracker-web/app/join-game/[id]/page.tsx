@@ -4,7 +4,7 @@ import { gameClient } from "@/app/lib/game-client";
 import { createSession } from "@/app/lib/session";
 import { redirect } from "next/navigation";
 
-export default async function JoinGame(props: { params: { id: string } }) {
+export default async function JoinGamePage(props: { params: { id: string } }) {
   const game = await gameClient.getGame(props.params.id);
 
   if (!game) {

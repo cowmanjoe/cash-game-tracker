@@ -4,7 +4,7 @@ import { gameClient } from "../lib/game-client";
 import { Game } from "../lib/game";
 import { createSession } from "../lib/session";
 
-export default async function NewGame() {
+export default async function NewGamePage() {
   async function createGame(formData: FormData) {
     'use server';
 

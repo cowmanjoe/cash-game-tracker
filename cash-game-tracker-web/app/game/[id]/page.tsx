@@ -5,14 +5,20 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function GamePage(props: { params: { id: string } }) {
-  const game: Game = await gameClient.getGame(props.params.id)
+  let game: Game;
+  try { 
+    game = await gameClient.getGame(props.params.id)
+  } catch (e) {
+    console.error(e);
+    redirect('/');
+  }
 
   console.log(JSON.stringify(game))
 
   const sessionPayload = await getSession();
 
   if (!sessionPayload) {
-    redirect('/');
+    redirect(`/join-game/${props.params.id}`);
   }
 
   async function addBuyIn(formData: FormData) {
