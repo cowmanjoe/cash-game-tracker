@@ -2,7 +2,7 @@ import { Game } from "@/app/lib/game";
 import { gameClient } from "@/app/lib/game-client";
 import { decrypt, getSession } from "@/app/lib/session";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function GamePage(props: { params: { id: string } }) {
   let game: Game;
@@ -10,14 +10,14 @@ export default async function GamePage(props: { params: { id: string } }) {
     game = await gameClient.getGame(props.params.id)
   } catch (e) {
     console.error(e);
-    redirect('/');
+    notFound();
   }
 
   console.log(JSON.stringify(game))
 
   const sessionPayload = await getSession();
 
-  if (!sessionPayload) {
+  if (!sessionPayload || !game.players[sessionPayload.accountId]) {
     redirect(`/join-game/${props.params.id}`);
   }
 

@@ -11,7 +11,7 @@ export default async function JoinGamePage(props: { params: { id: string } }) {
     redirect("/");
   }
 
-  async function joinGame(formData: FormData) {
+  async function joinGameAsNewPlayer(formData: FormData) {
     'use server';
 
     const name = formData.get('name');
@@ -36,24 +36,54 @@ export default async function JoinGamePage(props: { params: { id: string } }) {
     }
   }
 
+  async function joinGame(formData: FormData) {
+    'use server';
+
+    const accountId = formData.get('accountId');
+
+    if (!accountId) {
+      throw Error("Name was null");
+    }
+
+    try {
+      const player = await accountClient.getAccount(accountId.toString());
+
+      await createSession(player.id);
+    } catch (e) {
+      console.error(e);
+    }
+
+    redirect(`/game/${game.id}`);
+  }
+
   return (
     <main className="flex justify-center min-h-screen">
-      <div className="flex justify-center flex-col">
-        <form action={joinGame}>
+      <div className="flex justify-center flex-col gap-2">
+        <form action={joinGameAsNewPlayer}>
           <div className="flex gap-2 flex-col">
-          <input
+            <input
               className="rounded-lg"
               id="name"
               name="name"
               placeholder="Name"
               required
             />
-            
+
             <button type="submit" className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
-              Join Game
+              Join Game As New User
             </button>
           </div>
         </form>
+        {
+          Object.values(game.players).map(account =>
+            <form action={joinGame}>
+              <input type="hidden" name="accountId" value={account.id}/>
+              <button type="submit" key={account.id} className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
+                Join Game As {account.name}
+              </button>
+            </form>
+          )
+        }
       </div>
     </main>
   )
