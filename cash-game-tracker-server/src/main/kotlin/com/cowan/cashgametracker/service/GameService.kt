@@ -97,7 +97,8 @@ class GameService(private val gameRepo: GameRepository, private val accountServi
     private fun convertEntity(gameEntity: GameEntity): Game {
         val game = Game(
             EntityUtil.requireNotNullId(gameEntity.id),
-            gameEntity.createTime
+            gameEntity.createTime,
+            gameEntity.decimals
         )
 
         gameEntity.players.map { accountService.getAccount(it.accountId) }.forEach { game.addPlayer(it) }

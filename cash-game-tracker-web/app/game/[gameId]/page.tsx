@@ -63,9 +63,6 @@ export default async function GamePage(props: { params: { gameId: string } }) {
             </button>
           </div>
         </form>
-        <div className="p-5">
-
-        </div>
         <div className="flex flex-col gap-1">
           {
             game.buyIns.map(buyIn =>

@@ -16,5 +16,6 @@ data class GameEntity(
     val payments: MutableSet<PaymentEntity> = mutableSetOf(),
     @MappedCollection(idColumn = "GAME_ID")
     val players: MutableSet<GamePlayerEntity> = mutableSetOf(),
+    val decimals: Int = 2,
     @Id var id: String? = null
 )

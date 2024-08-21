@@ -2,7 +2,7 @@ package com.cowan.cashgametracker.model
 
 import java.time.Instant
 
-class Game(val id: String, val createTime: Instant) {
+class Game(val id: String, val createTime: Instant, val decimals: Int) {
 
     private val mutableBuyIns = mutableListOf<BuyIn>()
     private val mutableCashOuts = mutableMapOf<String, CashOut>()
@@ -15,19 +15,19 @@ class Game(val id: String, val createTime: Instant) {
     val players get() = mutablePlayers
 
     fun addBuyIn(buyIn: BuyIn) {
-        requirePlayerInGame(buyIn.accountId)
+        validatePlayerInGame(buyIn.accountId)
 
-        mutableBuyIns.add(buyIn)
+        mutableBuyIns.add(buyIn.copyWithPrecision(decimals))
     }
 
     fun applyCashOut(cashOut: CashOut) {
-        requirePlayerInGame(cashOut.accountId)
+        validatePlayerInGame(cashOut.accountId)
 
         mutableCashOuts[cashOut.accountId] = cashOut
     }
 
     fun addPayment(payment: Payment) {
-        requirePlayerInGame(payment.accountId)
+        validatePlayerInGame(payment.accountId)
 
         mutablePayments.add(payment)
     }
@@ -36,12 +36,13 @@ class Game(val id: String, val createTime: Instant) {
         mutablePlayers[player.id] = player
     }
 
-    private fun requirePlayerInGame(accountId: String) {
+    private fun validatePlayerInGame(accountId: String) {
         if (accountId !in players) {
             throw PlayerNotInGameException(accountId)
         }
     }
 }
 
+
 class PlayerNotInGameException(accountId: String) :
-    RuntimeException("Player with accountId $accountId is not in the game")
+    ValidationException("Player with accountId $accountId is not in the game")
