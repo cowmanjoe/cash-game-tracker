@@ -1,7 +1,8 @@
 # TODO
 
-- Make join game page where you specify name and it creates a new player and joins.
-- Redirect to the join game page when we don't have a session in a game.
-- Add drop down for current players in the game in the join game page.
+- Show buy in view when you click on one.
+- Add ability to edit or delete a buy in from the buy in view.
 - Change view to be a feed of all buy ins, cash outs and payments.
+- Create balances page that shows all players' current balances.
 - Make a sticky button for adding a buy in.
+- Clean up UI in join game page.

@@ -13,7 +13,7 @@ export interface BuyIn {
   id: string;
   accountId: string;
   amount: string;
-  createTime: number;
+  time: number;
 }
 
 export interface CashOut {
