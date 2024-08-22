@@ -49,6 +49,15 @@ class GameController(private val gameService: GameService) : BaseController() {
     fun addPlayer(@PathVariable("id") gameId: String, @PathVariable("playerId") playerId: String): GameResponse {
         return GameResponse.fromGame(gameService.addPlayer(gameId, playerId))
     }
+
+    @PutMapping("{id}/buy-in/{buyInId}")
+    fun updateBuyIn(
+        @PathVariable("id") gameId: String,
+        @PathVariable("buyInId") buyInId: String,
+        @RequestBody request: UpdateBuyInRequest
+    ): GameResponse {
+        return GameResponse.fromGame(gameService.updateBuyIn(gameId, buyInId, BigDecimal(request.amount)))
+    }
 }
 
 data class GameResponse(
@@ -88,6 +97,7 @@ data class BuyInResponse(val id: String, val accountId: String, val amount: Stri
 }
 
 data class AddBuyInRequest(val accountId: String, val amount: String)
+data class UpdateBuyInRequest(val amount: String)
 
 data class UpdateCashOutRequest(val accountId: String, val amount: String)
 

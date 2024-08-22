@@ -10,6 +10,7 @@ import com.cowan.cashgametracker.model.BuyIn
 import com.cowan.cashgametracker.model.CashOut
 import com.cowan.cashgametracker.model.Game
 import com.cowan.cashgametracker.model.Payment
+import com.cowan.cashgametracker.model.ValidationException
 import com.cowan.cashgametracker.repository.GameRepository
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -79,6 +80,20 @@ class GameService(private val gameRepo: GameRepository, private val accountServi
         val gameEntity = gameRepo.getById(gameId)
 
         gameEntity.players.add(GamePlayerEntity(player.id))
+
+        gameRepo.save(gameEntity)
+
+        return convertEntity(gameEntity)
+    }
+
+    @Transactional
+    fun updateBuyIn(gameId: String, buyInId: String, amount: BigDecimal): Game {
+        val gameEntity = gameRepo.getById(gameId)
+        val buyInEntity = gameEntity.buyIns.singleOrNull { it.id == buyInId }
+            ?: throw ValidationException("Buy in $buyInId not found in game $gameId")
+
+        gameEntity.buyIns.remove(buyInEntity)
+        gameEntity.buyIns.add(buyInEntity.copy(amount = amount))
 
         gameRepo.save(gameEntity)
 

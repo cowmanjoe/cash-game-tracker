@@ -45,6 +45,22 @@ class GameClientImpl implements GameClient {
     return game;
   }
 
+  async updateBuyIn(gameId: string, buyInId: string, amount: string): Promise<Game> {
+    const game = await this.sendRequest(`/game/${gameId}/buy-in/${buyInId}`, { 
+      method: 'PUT',
+      body: JSON.stringify({ 
+        amount
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    });
+
+    revalidateTag('game');
+
+    return game;
+  }
+
   private async sendRequest(path: string, init?: RequestInit) {
     const response = await fetch(`${this.baseUrl}${path}`, init);
 
