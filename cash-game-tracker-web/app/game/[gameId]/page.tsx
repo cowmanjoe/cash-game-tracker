@@ -1,12 +1,14 @@
 import { Game } from "@/app/lib/game";
 import { gameClient } from "@/app/lib/game-client";
 import { decrypt, getSession } from "@/app/lib/session";
+import { Liu_Jian_Mao_Cao } from "next/font/google";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { TiPlus } from "react-icons/ti"
 
 export default async function GamePage(props: { params: { gameId: string } }) {
   let game: Game;
-  try { 
+  try {
     game = await gameClient.getGame(props.params.gameId)
   } catch (e) {
     console.error(e);
@@ -46,23 +48,7 @@ export default async function GamePage(props: { params: { gameId: string } }) {
 
   return (
     <main className="flex justify-center">
-      <div className="flex justify-center flex-col">
-
-        <form action={addBuyIn}>
-          <div className="flex gap-1">
-            <input
-              className="rounded-lg"
-              id="amount"
-              name="amount"
-              placeholder="Amount"
-              required
-            />
-
-            <button type="submit" className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
-              Add Buy In
-            </button>
-          </div>
-        </form>
+      <div className="flex justify-start flex-col min-h-screen m-6 min-w-80">
         <div className="flex flex-col gap-1">
           {
             game.buyIns.map(buyIn =>
@@ -79,6 +65,17 @@ export default async function GamePage(props: { params: { gameId: string } }) {
               </div>
             )
           }
+        </div>
+        <div className="flex justify-end flex-grow flex-col m-10">
+          <div className="flex justify-end">
+            <Link href={`/game/${game.id}/add-buy-in`}>
+              <div className="flex w-12 h-12 justify-center gap-5 rounded-full bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
+                <div className="flex flex-col justify-center">
+                  <TiPlus />
+                </div>
+              </div>
+            </Link>
+          </div>
         </div>
       </div>
     </main>
