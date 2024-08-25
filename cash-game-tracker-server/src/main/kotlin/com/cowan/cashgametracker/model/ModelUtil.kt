@@ -8,4 +8,4 @@ object ModelUtil {
     }
 }
 
-open class ValidationException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+open class ValidationException(override val message: String, cause: Throwable? = null) : RuntimeException(message, cause)

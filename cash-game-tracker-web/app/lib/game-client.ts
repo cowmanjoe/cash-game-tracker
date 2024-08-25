@@ -64,7 +64,7 @@ class GameClientImpl implements GameClient {
   private async sendRequest(path: string, init?: RequestInit) {
     const response = await fetch(`${this.baseUrl}${path}`, init);
 
-    if (response.status > 400) {
+    if (response.status >= 400) {
       throw Error(`Request for ${path} returned error: ${await response.text()}`);
     } else {
       return await response.json();

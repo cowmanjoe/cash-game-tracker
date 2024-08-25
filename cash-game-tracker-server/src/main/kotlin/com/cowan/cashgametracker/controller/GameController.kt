@@ -30,18 +30,30 @@ class GameController(private val gameService: GameService) : BaseController() {
 
     @PostMapping("{id}/buy-in")
     fun addBuyIn(@PathVariable("id") gameId: String, @RequestBody request: AddBuyInRequest): GameResponse {
-        return GameResponse.fromGame(gameService.addBuyIn(gameId, request.accountId, BigDecimal(request.amount)))
+        return GameResponse.fromGame(
+            gameService.addBuyIn(
+                gameId,
+                request.accountId,
+                DataTranslator.toBigDecimal(request.amount)
+            )
+        )
     }
 
     @PutMapping("{id}/cash-out")
     fun updateCashOut(@PathVariable("id") gameId: String, @RequestBody request: UpdateCashOutRequest): GameResponse {
-        return GameResponse.fromGame(gameService.updateCashOut(gameId, request.accountId, BigDecimal(request.amount)))
+        return GameResponse.fromGame(
+            gameService.updateCashOut(
+                gameId,
+                request.accountId,
+                DataTranslator.toBigDecimal(request.amount)
+            )
+        )
     }
 
     @PostMapping("{id}/payment")
     fun addPayment(@PathVariable("id") gameId: String, @RequestBody request: AddPaymentRequest): GameResponse {
         return GameResponse.fromGame(
-            gameService.addPayment(gameId, request.accountId, BigDecimal(request.amount), request.side)
+            gameService.addPayment(gameId, request.accountId, DataTranslator.toBigDecimal(request.amount), request.side)
         )
     }
 
@@ -56,7 +68,13 @@ class GameController(private val gameService: GameService) : BaseController() {
         @PathVariable("buyInId") buyInId: String,
         @RequestBody request: UpdateBuyInRequest
     ): GameResponse {
-        return GameResponse.fromGame(gameService.updateBuyIn(gameId, buyInId, BigDecimal(request.amount)))
+        return GameResponse.fromGame(
+            gameService.updateBuyIn(
+                gameId,
+                buyInId,
+                DataTranslator.toBigDecimal(request.amount)
+            )
+        )
     }
 }
 
