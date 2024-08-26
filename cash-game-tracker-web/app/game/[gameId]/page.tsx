@@ -25,8 +25,8 @@ export default async function GamePage(props: { params: { gameId: string } }) {
   }
 
   return (
-    <main className="flex justify-center">
-      <div className="flex justify-start flex-col min-h-screen m-6 min-w-80">
+    <main className="flex justify-center min-h-screen">
+      <div className="flex justify-start flex-col m-6 min-w-80">
         <div className="flex flex-col gap-1">
           {
             game.buyIns.map(buyIn =>
