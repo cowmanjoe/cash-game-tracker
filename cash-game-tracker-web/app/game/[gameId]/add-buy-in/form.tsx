@@ -18,13 +18,11 @@ export default function AddBuyInForm({ game, activeAccountId }: { game: Game, ac
   return (
     <main className="flex justify-center min-h-screen">
       <div className="flex justify-start flex-col m-6 min-w-80 px-6">
-        <div>
-          <Link href={`/game/${game.id}`}>
-            <div className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
-              Back
-            </div>
-          </Link>
-        </div>
+        <Link href={`/game/${game.id}`}>
+          <div className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
+            Back
+          </div>
+        </Link>
 
         <div className="flex flex-col justify-center flex-grow">
           <form action={submitForm}>
