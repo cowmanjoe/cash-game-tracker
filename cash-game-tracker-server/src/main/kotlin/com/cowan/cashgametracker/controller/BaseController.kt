@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 open class BaseController {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ValidationException::class)
-    fun handleValidationException(exception: ValidationException): ValidationErrorResponse {
-        return ValidationErrorResponse(exception.message)
+    fun handleValidationException(exception: ValidationException): ErrorServerResponse<*> {
+        return ErrorServerResponse<Nothing>(ValidationErrorInfo(exception.message))
     }
 }
-
-data class ValidationErrorResponse(val message: String)

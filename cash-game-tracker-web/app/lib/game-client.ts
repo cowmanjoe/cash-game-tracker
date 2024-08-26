@@ -1,5 +1,6 @@
 import { Game } from "./game";
 import { revalidateTag } from 'next/cache';
+import { ValidationError } from "./validation-error";
 
 export interface GameClient {
   getGame(id: string): Promise<Game>;
@@ -65,6 +66,12 @@ class GameClientImpl implements GameClient {
     const response = await fetch(`${this.baseUrl}${path}`, init);
 
     if (response.status >= 400) {
+      const errorResponse = await response.json();
+
+      if (errorResponse && errorResponse.type && errorResponse.type === 'VALIDATION') {
+        throw new ValidationError(errorResponse.message);
+      }
+
       throw Error(`Request for ${path} returned error: ${await response.text()}`);
     } else {
       return await response.json();

@@ -29,12 +29,17 @@ class GameController(private val gameService: GameService) : BaseController() {
     }
 
     @PostMapping("{id}/buy-in")
-    fun addBuyIn(@PathVariable("id") gameId: String, @RequestBody request: AddBuyInRequest): GameResponse {
-        return GameResponse.fromGame(
-            gameService.addBuyIn(
-                gameId,
-                request.accountId,
-                DataTranslator.toBigDecimal(request.amount)
+    fun addBuyIn(
+        @PathVariable("id") gameId: String,
+        @RequestBody request: AddBuyInRequest
+    ): ServerResponse<GameResponse> {
+        return SuccessServerResponse(
+            GameResponse.fromGame(
+                gameService.addBuyIn(
+                    gameId,
+                    request.accountId,
+                    DataTranslator.toBigDecimal(request.amount)
+                )
             )
         )
     }

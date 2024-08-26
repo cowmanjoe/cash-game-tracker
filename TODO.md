@@ -1,6 +1,6 @@
 # TODO
 
-- Show an error message on invalid form submit
+- Show an error message on invalid form submit for edit buy in
 - Add button for delete buy in with confirmation.
 - Change view to be a feed of all buy ins, cash outs and payments.
 - Create ledger page that shows all players' current balances.
