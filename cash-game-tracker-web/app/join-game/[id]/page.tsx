@@ -1,15 +1,18 @@
-import { accountClient } from "@/app/lib/account-client";
+import { createAccount, getAccount } from "@/app/lib/account-client";
 import { Game } from "@/app/lib/game";
-import { gameClient } from "@/app/lib/game-client";
+import { addPlayer, getGame } from "@/app/lib/game-client";
 import { createSession } from "@/app/lib/session";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function JoinGamePage(props: { params: { id: string } }) {
-  const game = await gameClient.getGame(props.params.id);
+  const gameResponse = await getGame(props.params.id)
 
-  if (!game) {
-    redirect("/");
+  if (gameResponse.isError) {
+    console.error(`Received error: ${gameResponse.error.type}`)
+    notFound();
   }
+
+  const game = gameResponse.data;
 
   async function joinGameAsNewPlayer(formData: FormData) {
     'use server';
@@ -20,19 +23,23 @@ export default async function JoinGamePage(props: { params: { id: string } }) {
       throw Error("Name was null");
     }
 
-    let updatedGame: Game | null = null;
-    try {
-      const player = await accountClient.createAccount(name.toString());
+    const createAccountResponse = await createAccount(name.toString());
 
-      await createSession(player.id);
-
-      updatedGame = await gameClient.addPlayer(game.id, player.id);
-    } catch (e) {
-      console.error(e);
+    if (createAccountResponse.isError) {
+      throw Error(`Failed to create account: ${createAccountResponse.error.type}`)
     }
 
-    if (updatedGame) {
+    const player = createAccountResponse.data;
+
+    await createSession(player.id);
+
+    const addPlayerResponse = await addPlayer(game.id, player.id);
+
+    if (addPlayerResponse.isError) {
+      console.error(`Got an error while adding player: ${addPlayerResponse.error.type}`)
+    } else {
       redirect(`/game/${game.id}`);
+
     }
   }
 
@@ -45,13 +52,15 @@ export default async function JoinGamePage(props: { params: { id: string } }) {
       throw Error("Name was null");
     }
 
-    try {
-      const player = await accountClient.getAccount(accountId.toString());
+    const accountResponse = await getAccount(accountId.toString());
 
-      await createSession(player.id);
-    } catch (e) {
-      console.error(e);
+    if (accountResponse.isError) {
+      throw Error(`Failed to create account: ${accountResponse.error.type}`)
     }
+
+    const player = accountResponse.data;
+
+    await createSession(player.id);
 
     redirect(`/game/${game.id}`);
   }

@@ -1,25 +1,25 @@
 import { BuyIn, Game } from "@/app/lib/game";
-import { gameClient } from "@/app/lib/game-client";
+import { getGame, updateBuyIn } from "@/app/lib/game-client";
 import { notFound, redirect } from "next/navigation";
 
 export default async function BuyInEditPage(props: { params: { gameId: string, buyInId: string } }) {
-  let game: Game;
-  let buyIn: BuyIn;
-  try {
-    game = await gameClient.getGame(props.params.gameId);
-    const foundBuyIn = game.buyIns.find(b => b.id === props.params.buyInId);
+  const gameResponse = await getGame(props.params.gameId)
 
-    if (foundBuyIn) {
-      buyIn = foundBuyIn;
-    } else {
-      throw Error(`Buy in ${props.params.buyInId} not found`);
-    }
-  } catch (e) {
-    console.error(e);
+  if (gameResponse.isError) {
+    console.error(`Received error: ${gameResponse.error.type}`)
     notFound();
   }
 
-  async function editBuyIn(formData: FormData) {
+  const game = gameResponse.data;
+
+  const buyIn = game.buyIns.find(b => b.id === props.params.buyInId);
+
+  if (!buyIn) {
+    console.error(`Buy in ${props.params.buyInId} not found`)
+    notFound();
+  }
+  
+  async function editBuyIn(buyIn: BuyIn, formData: FormData) {
     'use server';
 
     const amount = formData.get('amount');
@@ -29,18 +29,18 @@ export default async function BuyInEditPage(props: { params: { gameId: string, b
     }
     console.log(`amount: ${amount}`)
 
-    try {
-      await gameClient.updateBuyIn(game.id, buyIn.id, amount.toString());
-    } catch (e) {
-      console.error(e)
-    }
+    const updateResponse = await updateBuyIn(game.id, buyIn.id, amount.toString());
 
-    redirect(`/game/${game.id}/buy-in/${buyIn.id}`)
+    if (updateResponse.isError) {
+      console.error(`Error while updating buy in: ${updateResponse.error.type}`)
+    } else {
+      redirect(`/game/${game.id}/buy-in/${buyIn.id}`)
+    }
   }
 
   return (
     <main className="flex justify-center h-screen">
-      <form className="flex justify-center flex-col" action={editBuyIn}>
+      <form className="flex justify-center flex-col" action={formData => editBuyIn(buyIn, formData)}>
         <div className="flex gap-1">
           <input
             className="rounded-lg"

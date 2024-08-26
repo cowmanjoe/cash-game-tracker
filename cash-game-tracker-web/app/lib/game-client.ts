@@ -1,82 +1,62 @@
+'use server'
+
+import { revalidateTag } from "next/cache";
 import { Game } from "./game";
-import { revalidateTag } from 'next/cache';
-import { ValidationError } from "./validation-error";
+import { ServerResponse } from "./response";
 
-export interface GameClient {
-  getGame(id: string): Promise<Game>;
-  createGame(): Promise<Game>;
-  addBuyIn(gameId: string, accountId: string, amount: string): Promise<Game>;
-  addPlayer(gameId: string, accountId: string): Promise<Game>;
+const baseUrl = 'http://localhost:8080';
+
+export async function getGame(id: string): Promise<ServerResponse<Game>> {
+  return sendRequest(`/game/${id}`, { next: { tags: ['game'] } })
 }
 
-class GameClientImpl implements GameClient {
-
-  constructor(private readonly baseUrl: string) {}
-
-  getGame(id: string): Promise<Game> {
-    return this.sendRequest(`/game/${id}`, { next: { tags: ['game'] } })
-  }
-
-  createGame(): Promise<Game> {
-    return this.sendRequest(`/game`, { method: 'POST' })
-  }
-
-  async addBuyIn(gameId: string, accountId: string, amount: string): Promise<Game> {
-    const game = await this.sendRequest(`/game/${gameId}/buy-in`, {
-      method: 'POST',
-      body: JSON.stringify({
-        accountId,
-        amount
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-    });
-
-    revalidateTag('game');
-
-    return game;
-  }
-
-  async addPlayer(gameId: string, accountId: string): Promise<Game> {
-    const game = await this.sendRequest(`/game/${gameId}/add-player/${accountId}`, { method: 'POST' })
-
-    revalidateTag('game');
-
-    return game;
-  }
-
-  async updateBuyIn(gameId: string, buyInId: string, amount: string): Promise<Game> {
-    const game = await this.sendRequest(`/game/${gameId}/buy-in/${buyInId}`, { 
-      method: 'PUT',
-      body: JSON.stringify({ 
-        amount
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-    });
-
-    revalidateTag('game');
-
-    return game;
-  }
-
-  private async sendRequest(path: string, init?: RequestInit) {
-    const response = await fetch(`${this.baseUrl}${path}`, init);
-
-    if (response.status >= 400) {
-      const errorResponse = await response.json();
-
-      if (errorResponse && errorResponse.type && errorResponse.type === 'VALIDATION') {
-        throw new ValidationError(errorResponse.message);
-      }
-
-      throw Error(`Request for ${path} returned error: ${await response.text()}`);
-    } else {
-      return await response.json();
-    }
-  }
+export async function createGame(): Promise<ServerResponse<Game>> {
+  return sendRequest(`/game`, { method: 'POST' })
 }
 
-export const gameClient = new GameClientImpl('http://localhost:8080');
+export async function addBuyIn(gameId: string, accountId: string, amount: string): Promise<ServerResponse<Game>> {
+  const gameResponse = await sendRequest<Game>(`/game/${gameId}/buy-in`, {
+    method: 'POST',
+    body: JSON.stringify({
+      accountId,
+      amount
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  });
+
+  revalidateTag('game');
+
+  return gameResponse;
+}
+
+export async function addPlayer(gameId: string, accountId: string): Promise<ServerResponse<Game>> {
+  const gameResponse = await sendRequest<Game>(`/game/${gameId}/add-player/${accountId}`, { method: 'POST' })
+
+  revalidateTag('game');
+
+  return gameResponse;
+}
+
+export async function updateBuyIn(gameId: string, buyInId: string, amount: string): Promise<ServerResponse<Game>> {
+  const gameResponse = await sendRequest<Game>(`/game/${gameId}/buy-in/${buyInId}`, { 
+    method: 'PUT',
+    body: JSON.stringify({ 
+      amount
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  });
+
+  revalidateTag('game');
+
+  return gameResponse;
+}
+
+async function sendRequest<R>(path: string, init?: RequestInit): Promise<ServerResponse<R>> {
+  const response = await fetch(`${baseUrl}${path}`, init);
+
+  return await response.json();
+}

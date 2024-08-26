@@ -1,5 +1,5 @@
 import { BuyIn, Game } from "@/app/lib/game";
-import { gameClient } from "@/app/lib/game-client";
+import { getGame } from "@/app/lib/game-client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -14,19 +14,19 @@ const DAYS = [
 ]
 
 export default async function BuyInPage(props: { params: { gameId: string, buyInId: string } }) {
-  let game: Game;
-  let buyIn: BuyIn;
-  try {
-    game = await gameClient.getGame(props.params.gameId);
-    const foundBuyIn = game.buyIns.find(b => b.id === props.params.buyInId);
+  const gameResponse = await getGame(props.params.gameId)
 
-    if (foundBuyIn) {
-      buyIn = foundBuyIn;
-    } else {
-      throw Error(`Buy in ${props.params.buyInId} not found`);
-    }
-  } catch (e) {
-    console.error(e);
+  if (gameResponse.isError) {
+    console.error(`Received error: ${gameResponse.error.type}`)
+    notFound();
+  }
+
+  const game = gameResponse.data;
+
+  const buyIn = game.buyIns.find(b => b.id === props.params.buyInId);
+
+  if (!buyIn) {
+    console.error(`Buy in ${props.params.buyInId} not found`)
     notFound();
   }
 

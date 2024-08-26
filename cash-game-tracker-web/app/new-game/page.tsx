@@ -1,11 +1,11 @@
 import { redirect, RedirectType } from "next/navigation";
-import { accountClient } from "../lib/account-client";
-import { gameClient } from "../lib/game-client";
 import { Game } from "../lib/game";
 import { createSession } from "../lib/session";
+import { addPlayer, createGame } from "../lib/game-client";
+import { createAccount } from "../lib/account-client";
 
 export default async function NewGamePage() {
-  async function createGame(formData: FormData) {
+  async function submitCreateGameForm(formData: FormData) {
     'use server';
 
     const name = formData.get('name');
@@ -14,28 +14,37 @@ export default async function NewGamePage() {
       throw Error("Name was null");
     }
     
-    let game: Game | null = null;
-    try {
-      game = await gameClient.createGame();
-      const player = await accountClient.createAccount(name.toString());
+    const createGameResponse = await createGame();
 
-      await createSession(player.id);
-
-      game = await gameClient.addPlayer(game.id, player.id);
-    } catch (e) {
-      console.error(e);
-      game = null;
+    if (createGameResponse.isError) {
+      throw Error(`Failed to create game: ${createGameResponse.error.type}`);
     }
 
-    if (game) {
-      redirect(`/game/${game.id}`);
+    const game = createGameResponse.data;
+
+    const createAccountResponse = await createAccount(name.toString());
+
+    if (createAccountResponse.isError) {
+      throw Error(`Failed to create account: ${createAccountResponse.error.type}`);
     }
+
+    const account = createAccountResponse.data;
+
+    await createSession(account.id);
+
+    const addPlayerResponse = await addPlayer(game.id, account.id);
+
+    if (addPlayerResponse.isError) {
+      throw Error(`Failed to add player to game: ${addPlayerResponse.error.type}`);
+    }
+
+    redirect(`/game/${game.id}`);
   }
 
   return (
     <main className="flex justify-center min-h-screen">
       <div className="flex justify-center flex-col">
-        <form action={createGame}>
+        <form action={submitCreateGameForm}>
           <div className="flex gap-2 flex-col">
           <input
               className="rounded-lg"

@@ -1,5 +1,5 @@
 import { Game } from "@/app/lib/game";
-import { gameClient } from "@/app/lib/game-client";
+import { getGame } from "@/app/lib/game-client";
 import { decrypt, getSession } from "@/app/lib/session";
 import { Liu_Jian_Mao_Cao } from "next/font/google";
 import Link from "next/link";
@@ -7,13 +7,14 @@ import { notFound, redirect } from "next/navigation";
 import { TiPlus } from "react-icons/ti"
 
 export default async function GamePage(props: { params: { gameId: string } }) {
-  let game: Game;
-  try {
-    game = await gameClient.getGame(props.params.gameId)
-  } catch (e) {
-    console.error(e);
+  const gameResponse = await getGame(props.params.gameId)
+
+  if (gameResponse.isError) {
+    console.error(`Received error: ${gameResponse.error.type}`)
     notFound();
   }
+
+  const game = gameResponse.data;
 
   console.log(JSON.stringify(game))
 
@@ -22,7 +23,7 @@ export default async function GamePage(props: { params: { gameId: string } }) {
   if (!sessionPayload || !game.players[sessionPayload.accountId]) {
     redirect(`/join-game/${props.params.gameId}`);
   }
-  
+
   return (
     <main className="flex justify-center">
       <div className="flex justify-start flex-col min-h-screen m-6 min-w-80">

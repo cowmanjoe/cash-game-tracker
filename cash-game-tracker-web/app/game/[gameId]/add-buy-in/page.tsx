@@ -1,18 +1,19 @@
 import { Game } from "@/app/lib/game";
-import { gameClient } from "@/app/lib/game-client";
 import { getSession } from "@/app/lib/session";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import AddBuyInForm from "./form";
+import { getGame } from "@/app/lib/game-client";
 
 export default async function AddBuyInPage(props: { params: { gameId: string } }) {
-  let game: Game;
-  try {
-    game = await gameClient.getGame(props.params.gameId)
-  } catch (e) {
-    console.error(e);
+  const gameResponse = await getGame(props.params.gameId);
+
+  if (gameResponse.isError) {
+    console.error(`Received error: ${gameResponse.error.type}`);
     notFound();
   }
+
+  const game = gameResponse.data;
 
   const sessionPayload = await getSession();
 

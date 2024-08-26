@@ -1,6 +1,5 @@
 import { Game } from "@/app/lib/game";
-import { gameClient } from "@/app/lib/game-client";
-import { addBuyIn } from "@/app/lib/game-client-new";
+import { addBuyIn } from "@/app/lib/game-client";
 import { redirect } from "next/navigation";
 
 export interface ActionState {
