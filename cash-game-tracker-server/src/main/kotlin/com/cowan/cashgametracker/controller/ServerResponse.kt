@@ -23,3 +23,8 @@ interface ErrorInfo {
 class ValidationErrorInfo(val message: String) : ErrorInfo{
     override val type = "VALIDATION"
 }
+
+class ServerErrorInfo : ErrorInfo {
+    override val type = "SERVER"
+    val message = "Unknown error occurred"
+}

@@ -19,13 +19,13 @@ import java.math.BigDecimal
 class GameController(private val gameService: GameService) : BaseController() {
 
     @GetMapping("{id}")
-    fun getGame(@PathVariable("id") id: String): GameResponse {
-        return GameResponse.fromGame(gameService.getGame(id))
+    fun getGame(@PathVariable("id") id: String): ServerResponse<GameResponse> {
+        return SuccessServerResponse(GameResponse.fromGame(gameService.getGame(id)))
     }
 
     @PostMapping
-    fun createGame(): GameResponse {
-        return GameResponse.fromGame(gameService.createGame())
+    fun createGame(): ServerResponse<GameResponse> {
+        return SuccessServerResponse(GameResponse.fromGame(gameService.createGame()))
     }
 
     @PostMapping("{id}/buy-in")
@@ -45,26 +45,44 @@ class GameController(private val gameService: GameService) : BaseController() {
     }
 
     @PutMapping("{id}/cash-out")
-    fun updateCashOut(@PathVariable("id") gameId: String, @RequestBody request: UpdateCashOutRequest): GameResponse {
-        return GameResponse.fromGame(
-            gameService.updateCashOut(
-                gameId,
-                request.accountId,
-                DataTranslator.toBigDecimal(request.amount)
+    fun updateCashOut(
+        @PathVariable("id") gameId: String,
+        @RequestBody request: UpdateCashOutRequest
+    ): ServerResponse<GameResponse> {
+        return SuccessServerResponse(
+            GameResponse.fromGame(
+                gameService.updateCashOut(
+                    gameId,
+                    request.accountId,
+                    DataTranslator.toBigDecimal(request.amount)
+                )
             )
         )
     }
 
     @PostMapping("{id}/payment")
-    fun addPayment(@PathVariable("id") gameId: String, @RequestBody request: AddPaymentRequest): GameResponse {
-        return GameResponse.fromGame(
-            gameService.addPayment(gameId, request.accountId, DataTranslator.toBigDecimal(request.amount), request.side)
+    fun addPayment(
+        @PathVariable("id") gameId: String,
+        @RequestBody request: AddPaymentRequest
+    ): ServerResponse<GameResponse> {
+        return SuccessServerResponse(
+            GameResponse.fromGame(
+                gameService.addPayment(
+                    gameId,
+                    request.accountId,
+                    DataTranslator.toBigDecimal(request.amount),
+                    request.side
+                )
+            )
         )
     }
 
     @PostMapping("{id}/add-player/{playerId}")
-    fun addPlayer(@PathVariable("id") gameId: String, @PathVariable("playerId") playerId: String): GameResponse {
-        return GameResponse.fromGame(gameService.addPlayer(gameId, playerId))
+    fun addPlayer(
+        @PathVariable("id") gameId: String,
+        @PathVariable("playerId") playerId: String
+    ): ServerResponse<GameResponse> {
+        return SuccessServerResponse(GameResponse.fromGame(gameService.addPlayer(gameId, playerId)))
     }
 
     @PutMapping("{id}/buy-in/{buyInId}")
@@ -72,12 +90,14 @@ class GameController(private val gameService: GameService) : BaseController() {
         @PathVariable("id") gameId: String,
         @PathVariable("buyInId") buyInId: String,
         @RequestBody request: UpdateBuyInRequest
-    ): GameResponse {
-        return GameResponse.fromGame(
-            gameService.updateBuyIn(
-                gameId,
-                buyInId,
-                DataTranslator.toBigDecimal(request.amount)
+    ): ServerResponse<GameResponse> {
+        return SuccessServerResponse(
+            GameResponse.fromGame(
+                gameService.updateBuyIn(
+                    gameId,
+                    buyInId,
+                    DataTranslator.toBigDecimal(request.amount)
+                )
             )
         )
     }

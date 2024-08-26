@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RestController
 class AccountController(private val accountService: AccountService) : BaseController() {
 
     @GetMapping("{id}")
-    fun getAccount(@PathVariable("id") id: String): AccountResponse {
-        return AccountResponse.fromAccount(accountService.getAccount(id))
+    fun getAccount(@PathVariable("id") id: String): ServerResponse<AccountResponse> {
+        return SuccessServerResponse(AccountResponse.fromAccount(accountService.getAccount(id)))
     }
 
     @PostMapping("register")
-    fun registerAccount(@RequestBody request: RegisterAccountRequest): AccountResponse {
-        return AccountResponse.fromAccount(accountService.registerAccount(request.name))
+    fun registerAccount(@RequestBody request: RegisterAccountRequest): ServerResponse<AccountResponse> {
+        return SuccessServerResponse(AccountResponse.fromAccount(accountService.registerAccount(request.name)))
     }
 }
 
