@@ -85,7 +85,7 @@ export default async function JoinGamePage(props: { params: { id: string } }) {
         </form>
         {
           Object.values(game.players).map(account =>
-            <form action={joinGame}>
+            <form action={joinGame} key={account.id}>
               <input type="hidden" name="accountId" value={account.id}/>
               <button type="submit" key={account.id} className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
                 Join Game As {account.name}

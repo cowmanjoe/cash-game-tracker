@@ -29,7 +29,8 @@ export async function decrypt(session: string | undefined = ''): Promise<Session
 export async function createSession(accountId: string) {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   const session = await encrypt({ accountId, expiresAt })
- 
+  
+  console.log(session);
   cookies().set('session', session, {
     httpOnly: true,
     secure: true,
@@ -41,7 +42,11 @@ export async function createSession(accountId: string) {
 
 export async function getSession(): Promise<SessionPayload | null> {
   const session = cookies().get('session')?.value
+  console.log(`retrieved session ${session}`);
+
   const payload = await decrypt(session)
+
+  console.log(`retrieved payload=${payload}`)
 
   if (!session || !payload) {
     return null
