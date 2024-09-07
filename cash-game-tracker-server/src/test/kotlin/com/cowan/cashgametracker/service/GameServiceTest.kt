@@ -206,4 +206,57 @@ class GameServiceTest {
         assertTrue(game.players.contains(ACCOUNT_ID1))
         assertTrue(game.players.contains(ACCOUNT_ID2))
     }
+
+    @Test
+    fun test_getBalances_emptyGame_returnsEmptyMap() {
+        val balances = gameService.getBalances(GAME_ID)
+
+        assertEquals(0, balances.size)
+    }
+
+    @Test
+    fun test_getBalances_noTransactions_returnsZeroBalances() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID2)
+
+        val balances = gameService.getBalances(GAME_ID)
+
+        assertEquals(2, balances.size)
+        assertTrue(balances.all { it.balance.compareTo(BigDecimal.ZERO) == 0 })
+    }
+
+    @Test
+    fun test_getBalances_withBuyIns_returnsCorrectAmounts() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID2)
+
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(30))
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(40))
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID2, BigDecimal(90))
+
+        val balances = gameService.getBalances(GAME_ID)
+
+        assertEquals(2, balances.size)
+        assertEquals(0, balances.single { it.accountId == ACCOUNT_ID1 }.balance.compareTo(BigDecimal(-70)))
+        assertEquals(0, balances.single { it.accountId == ACCOUNT_ID2 }.balance.compareTo(BigDecimal(-90)))
+    }
+
+    @Test
+    fun test_getBalances_withBuyInsAndCashOuts_returnsCorrectAmounts() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID2)
+
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(30))
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(40))
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID2, BigDecimal(90))
+
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(10))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID2, BigDecimal(150))
+
+        val balances = gameService.getBalances(GAME_ID)
+
+        assertEquals(2, balances.size)
+        assertEquals(0, balances.single { it.accountId == ACCOUNT_ID1 }.balance.compareTo(BigDecimal(-60)))
+        assertEquals(0, balances.single { it.accountId == ACCOUNT_ID2 }.balance.compareTo(BigDecimal(60)))
+    }
 }

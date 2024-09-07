@@ -1,5 +1,6 @@
 package com.cowan.cashgametracker.model
 
+import java.math.BigDecimal
 import java.time.Instant
 
 class Game(val id: String, val createTime: Instant, val decimals: Int) {
@@ -34,6 +35,15 @@ class Game(val id: String, val createTime: Instant, val decimals: Int) {
 
     fun addPlayer(player: Account) {
         mutablePlayers[player.id] = player
+    }
+
+    fun getBalances(): List<Balance> {
+        return players.keys.map { accountId ->
+            val buyInTotal = buyIns.filter { it.accountId == accountId }.sumOf { it.amount }
+            val cashOutAmount = cashOutsByAccountId[accountId]?.amount ?: BigDecimal.ZERO
+
+            Balance(accountId, players.getValue(accountId).name, cashOutAmount - buyInTotal)
+        }
     }
 
     private fun validatePlayerInGame(accountId: String) {

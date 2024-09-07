@@ -1,5 +1,6 @@
 package com.cowan.cashgametracker.controller
 
+import com.cowan.cashgametracker.model.Balance
 import com.cowan.cashgametracker.model.BuyIn
 import com.cowan.cashgametracker.model.CashOut
 import com.cowan.cashgametracker.model.Game
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.math.BigDecimal
 
 @RestController
 @RequestMapping("game")
@@ -101,6 +101,11 @@ class GameController(private val gameService: GameService) : BaseController() {
             )
         )
     }
+
+    @GetMapping("{id}/balances")
+    fun getBalances(@PathVariable("id") gameId: String): ServerResponse<BalancesResponse> {
+        return SuccessServerResponse(BalancesResponse.fromBalances(gameService.getBalances(gameId)))
+    }
 }
 
 data class GameResponse(
@@ -170,6 +175,16 @@ data class PaymentResponse(
                 payment.createTime.toEpochMilli(),
                 payment.side.toString()
             )
+        }
+    }
+}
+
+data class BalancesResponse(val balances: List<Item>) {
+    data class Item(val accountId: String, val name: String, val balance: String)
+
+    companion object {
+        fun fromBalances(balances: List<Balance>): BalancesResponse {
+            return BalancesResponse(balances.map { Item(it.accountId, it.name, it.balance.toPlainString())})
         }
     }
 }

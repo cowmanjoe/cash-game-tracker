@@ -6,6 +6,7 @@ import com.cowan.cashgametracker.entity.EntityUtil
 import com.cowan.cashgametracker.entity.GameEntity
 import com.cowan.cashgametracker.entity.GamePlayerEntity
 import com.cowan.cashgametracker.entity.PaymentEntity
+import com.cowan.cashgametracker.model.Balance
 import com.cowan.cashgametracker.model.BuyIn
 import com.cowan.cashgametracker.model.CashOut
 import com.cowan.cashgametracker.model.Game
@@ -98,6 +99,14 @@ class GameService(private val gameRepo: GameRepository, private val accountServi
         gameRepo.save(gameEntity)
 
         return convertEntity(gameEntity)
+    }
+
+    fun getBalances(gameId: String): List<Balance> {
+        val gameEntity = gameRepo.getById(gameId)
+
+        val game = convertEntity(gameEntity)
+
+        return game.getBalances()
     }
 
     private fun convertEntity(buyInEntity: BuyInEntity): BuyIn {
