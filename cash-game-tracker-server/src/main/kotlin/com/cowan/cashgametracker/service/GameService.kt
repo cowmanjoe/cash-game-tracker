@@ -11,6 +11,7 @@ import com.cowan.cashgametracker.model.BuyIn
 import com.cowan.cashgametracker.model.CashOut
 import com.cowan.cashgametracker.model.Game
 import com.cowan.cashgametracker.model.Payment
+import com.cowan.cashgametracker.model.Transfer
 import com.cowan.cashgametracker.model.ValidationException
 import com.cowan.cashgametracker.repository.GameRepository
 import org.springframework.stereotype.Component
@@ -107,6 +108,14 @@ class GameService(private val gameRepo: GameRepository, private val accountServi
         val game = convertEntity(gameEntity)
 
         return game.getBalances()
+    }
+
+    fun getTransfers(gameId: String): List<Transfer> {
+        val gameEntity = gameRepo.getById(gameId)
+
+        val game = convertEntity(gameEntity)
+
+        return game.getTransfers()
     }
 
     private fun convertEntity(buyInEntity: BuyInEntity): BuyIn {

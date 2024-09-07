@@ -46,6 +46,12 @@ class Game(val id: String, val createTime: Instant, val decimals: Int) {
         }
     }
 
+    fun getTransfers(): List<Transfer> {
+        val transfers: List<Transfer> = buyIns + cashOutsByAccountId.values + payments
+
+        return transfers.filter { it.amount.compareTo(BigDecimal.ZERO) != 0 }.sortedByDescending { it.createTime }
+    }
+
     private fun validatePlayerInGame(accountId: String) {
         if (accountId !in players) {
             throw PlayerNotInGameException(accountId)

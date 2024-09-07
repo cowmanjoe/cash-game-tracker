@@ -5,6 +5,7 @@ import com.cowan.cashgametracker.entity.GameEntity
 import com.cowan.cashgametracker.model.Account
 import com.cowan.cashgametracker.model.Payment
 import com.cowan.cashgametracker.model.PlayerNotInGameException
+import com.cowan.cashgametracker.model.Transfer
 import com.cowan.cashgametracker.repository.GameRepository
 import io.mockk.every
 import io.mockk.mockk
@@ -258,5 +259,82 @@ class GameServiceTest {
         assertEquals(2, balances.size)
         assertEquals(0, balances.single { it.accountId == ACCOUNT_ID1 }.balance.compareTo(BigDecimal(-60)))
         assertEquals(0, balances.single { it.accountId == ACCOUNT_ID2 }.balance.compareTo(BigDecimal(60)))
+    }
+
+    @Test
+    fun test_getTransfers_withNoTransfers_returnsEmptyList() {
+        val transfers = gameService.getTransfers(GAME_ID)
+
+        assertTrue(transfers.isEmpty())
+    }
+
+    @Test
+    fun test_getTransfers_withBuyIns_returnsBuyIns() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID2)
+
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(30))
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(40))
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID2, BigDecimal(90))
+
+        val transfers = gameService.getTransfers(GAME_ID)
+
+        assertEquals(3, transfers.size)
+        assertContainsTransfer(Transfer.Type.BUY_IN, ACCOUNT_ID1, BigDecimal(30), transfers)
+        assertContainsTransfer(Transfer.Type.BUY_IN, ACCOUNT_ID1, BigDecimal(40), transfers)
+        assertContainsTransfer(Transfer.Type.BUY_IN, ACCOUNT_ID2, BigDecimal(90), transfers)
+    }
+
+    @Test
+    fun test_getTransfers_withBuyInsAndCashOuts_returnsBuyInsAndCashOuts() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID2)
+
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(30))
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(40))
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID2, BigDecimal(90))
+
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(10))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID2, BigDecimal(150))
+
+        val transfers = gameService.getTransfers(GAME_ID)
+
+        assertEquals(5, transfers.size)
+        assertContainsTransfer(Transfer.Type.BUY_IN, ACCOUNT_ID1, BigDecimal(30), transfers)
+        assertContainsTransfer(Transfer.Type.BUY_IN, ACCOUNT_ID1, BigDecimal(40), transfers)
+        assertContainsTransfer(Transfer.Type.BUY_IN, ACCOUNT_ID2, BigDecimal(90), transfers)
+        assertContainsTransfer(Transfer.Type.CASH_OUT, ACCOUNT_ID1, BigDecimal(10), transfers)
+        assertContainsTransfer(Transfer.Type.CASH_OUT, ACCOUNT_ID2, BigDecimal(150), transfers)
+    }
+
+    @Test
+    fun test_getTransfers_withCashOutNegated_returnsNoCashOut() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID2)
+
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(30))
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(40))
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID2, BigDecimal(90))
+
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(10))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal.ZERO)
+
+        val transfers = gameService.getTransfers(GAME_ID)
+
+        assertEquals(3, transfers.size)
+        assertTrue(transfers.all { it.type == Transfer.Type.BUY_IN })
+    }
+
+    private fun assertContainsTransfer(
+        expectedType: Transfer.Type,
+        expectedAccountId: String,
+        expectedAmount: BigDecimal,
+        transfers: List<Transfer>
+    ) {
+        assertTrue(transfers.any { transfer ->
+            expectedType == transfer.type &&
+                    expectedAccountId == transfer.accountId &&
+                    0 == expectedAmount.compareTo(transfer.amount)
+        })
     }
 }

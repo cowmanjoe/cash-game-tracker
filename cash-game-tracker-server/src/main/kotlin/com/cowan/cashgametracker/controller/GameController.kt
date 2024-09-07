@@ -5,6 +5,7 @@ import com.cowan.cashgametracker.model.BuyIn
 import com.cowan.cashgametracker.model.CashOut
 import com.cowan.cashgametracker.model.Game
 import com.cowan.cashgametracker.model.Payment
+import com.cowan.cashgametracker.model.Transfer
 import com.cowan.cashgametracker.service.GameService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -106,6 +107,11 @@ class GameController(private val gameService: GameService) : BaseController() {
     fun getBalances(@PathVariable("id") gameId: String): ServerResponse<BalancesResponse> {
         return SuccessServerResponse(BalancesResponse.fromBalances(gameService.getBalances(gameId)))
     }
+
+    @GetMapping("{id}/transfers")
+    fun getTransfers(@PathVariable("id") gameId: String): ServerResponse<TransfersResponse> {
+        return SuccessServerResponse(TransfersResponse.fromTransfers(gameService.getTransfers(gameId)))
+    }
 }
 
 data class GameResponse(
@@ -184,7 +190,24 @@ data class BalancesResponse(val balances: List<Item>) {
 
     companion object {
         fun fromBalances(balances: List<Balance>): BalancesResponse {
-            return BalancesResponse(balances.map { Item(it.accountId, it.name, it.balance.toPlainString())})
+            return BalancesResponse(balances.map { Item(it.accountId, it.name, it.balance.toPlainString()) })
+        }
+    }
+}
+
+data class TransfersResponse(val transfers: List<Item>) {
+    data class Item(val accountId: String, val amount: String, val type: String, val createTime: Long)
+
+    companion object {
+        fun fromTransfers(transfers: List<Transfer>): TransfersResponse {
+            return TransfersResponse(transfers.map {
+                Item(
+                    it.accountId,
+                    it.amount.toPlainString(),
+                    it.type.toString(),
+                    it.createTime.toEpochMilli()
+                )
+            })
         }
     }
 }
