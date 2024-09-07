@@ -28,3 +28,13 @@ export interface Payment {
   time: number;
   side: "PAYER" | "RECIPIENT";
 }
+
+export interface Balances {
+  balances: Balance[];
+}
+
+export interface Balance {
+  accountId: string;
+  name: string;
+  balance: string;
+}

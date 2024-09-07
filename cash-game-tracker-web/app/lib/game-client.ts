@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidateTag } from "next/cache";
-import { Game } from "./game";
+import { Balances, Game } from "./game";
 import { ServerResponse } from "./response";
 
 const baseUrl = 'http://localhost:8080';
@@ -53,6 +53,10 @@ export async function updateBuyIn(gameId: string, buyInId: string, amount: strin
   revalidateTag('game');
 
   return gameResponse;
+}
+
+export async function getBalances(gameId: string): Promise<ServerResponse<Balances>> {
+  return await sendRequest<Balances>(`/game/${gameId}/balances`)
 }
 
 async function sendRequest<R>(path: string, init?: RequestInit): Promise<ServerResponse<R>> {

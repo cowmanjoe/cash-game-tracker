@@ -1,10 +1,8 @@
-import { Game } from "@/app/lib/game";
 import { getGame } from "@/app/lib/game-client";
-import { decrypt, getSession } from "@/app/lib/session";
-import { Liu_Jian_Mao_Cao } from "next/font/google";
+import { getSession } from "@/app/lib/session";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { TiPlus } from "react-icons/ti"
+import { TiPlus } from "react-icons/ti";
 
 export default async function GamePage(props: { params: { gameId: string } }) {
   const gameResponse = await getGame(props.params.gameId)
