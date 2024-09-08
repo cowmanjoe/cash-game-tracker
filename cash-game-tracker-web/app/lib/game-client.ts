@@ -63,6 +63,23 @@ export async function getTransfers(gameId: string): Promise<ServerResponse<Trans
   return await sendRequest<Transfers>(`/game/${gameId}/transfers`);
 }
 
+export async function updateCashOut(gameId: string, accountId: string, amount: string): Promise<ServerResponse<Game>> {
+  const gameResponse = await sendRequest<Game>(`/game/${gameId}/cash-out`, { 
+    method: 'PUT',
+    body: JSON.stringify({
+      accountId,
+      amount
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  });
+
+  revalidateTag('game');
+
+  return gameResponse;
+}
+
 async function sendRequest<R>(path: string, init?: RequestInit): Promise<ServerResponse<R>> {
   const response = await fetch(`${baseUrl}${path}`, init);
 
