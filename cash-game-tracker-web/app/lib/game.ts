@@ -38,3 +38,15 @@ export interface Balance {
   name: string;
   balance: string;
 }
+
+export interface Transfers { 
+  transfers: Transfer[];
+}
+
+export interface Transfer {
+  id?: string;
+  type: string;
+  amount: string;
+  accountId: string;
+  time: number;
+}

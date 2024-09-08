@@ -9,4 +9,5 @@ class CashOut(
     override val createTime: Instant
 ) : Transfer {
     override val type = Transfer.Type.CASH_OUT
+    override val id = null
 }

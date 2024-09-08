@@ -5,7 +5,7 @@ import java.math.RoundingMode
 import java.time.Instant
 
 class BuyIn(
-    val id: String,
+    override val id: String,
     override val accountId: String,
     override val amount: BigDecimal,
     override val createTime: Instant

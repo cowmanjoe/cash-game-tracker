@@ -1,20 +1,25 @@
-import { getGame } from "@/app/lib/game-client";
+import { getGame, getTransfers } from "@/app/lib/game-client";
 import { getSession } from "@/app/lib/session";
 import Link from "next/link";
+import TransferTable from "../transfer-table";
 import { notFound, redirect } from "next/navigation";
-import { TiPlus } from "react-icons/ti";
 
-export default async function GamePage(props: { params: { gameId: string } }) {
-  const gameResponse = await getGame(props.params.gameId)
+export default async function GamePage({ params }: { params: { gameId: string } }) {
+  const gameResponse = await getGame(params.gameId)
+  const transfersResponse = await getTransfers(params.gameId);
 
   if (gameResponse.isError) {
     console.error(`Received error: ${gameResponse.error.type}`)
     notFound();
   }
 
-  const game = gameResponse.data;
+  if (transfersResponse.isError) {
+    console.error(`Received error: ${transfersResponse.error.type}`)
+    notFound();
+  }
 
-  console.log(JSON.stringify(game))
+  const game = gameResponse.data
+  const transactions = transfersResponse.data.transfers;
 
   const sessionPayload = await getSession();
 
@@ -22,41 +27,23 @@ export default async function GamePage(props: { params: { gameId: string } }) {
     console.log(`sessionPayload=${sessionPayload}`);
     console.log(`accountId=${sessionPayload?.accountId}`)
 
-    redirect(`/join-game/${props.params.gameId}`);
+    redirect(`/join-game/${params.gameId}`);
   }
 
   return (
-    <main className="flex justify-center min-h-screen">
-      <div className="flex justify-start flex-col m-6 min-w-80">
-        <div className="flex flex-col gap-1">
-          {
-            game.buyIns.map(buyIn =>
-              <div key={buyIn.id}>
-                <Link href={`/game/${game.id}/buy-in/${buyIn.id}`} className="flex justify-between h-10 align-center mx-5">
-                  <span className="content-center">
-                    {game.players[buyIn.accountId].name}
-                  </span>
-                  <span className="content-center">
-                    {buyIn.amount}
-                  </span>
-                </Link>
-                <hr />
-              </div>
-            )
-          }
-        </div>
-
-        <div className="flex justify-center sticky bottom-16 right-4">
-          <Link href={`/game/${game.id}/add-buy-in`}>
-            <div className="flex w-12 h-12 justify-center gap-5 rounded-full bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
-              <div className="flex flex-col justify-center">
-                <TiPlus />
-              </div>
-            </div>
-          </Link>
-        </div>
+    <div className="container mx-auto p-4">
+      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <TransferTable game={game} transfers={transactions}/>
       </div>
-    </main>
+      <div className="mt-4 flex space-x-4">
+        <Link href={`/game/${game.id}/add-buy-in`} className="inline-flex items-center justify-center px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-sm font-medium transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          + Add Buy In
+        </Link>
+        <Link href={`/game/${game.id}/cash-out`} className="inline-flex items-center justify-center px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-sm font-medium transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          $ Cash Out
+        </Link>
+      </div>
 
+    </div>
   );
-}
+};

@@ -4,7 +4,7 @@ import java.math.BigDecimal
 import java.time.Instant
 
 class Payment(
-    val id: String,
+    override val id: String,
     override val accountId: String,
     override val amount: BigDecimal,
     override val createTime: Instant,

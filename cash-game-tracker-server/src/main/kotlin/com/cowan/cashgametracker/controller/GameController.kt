@@ -196,12 +196,13 @@ data class BalancesResponse(val balances: List<Item>) {
 }
 
 data class TransfersResponse(val transfers: List<Item>) {
-    data class Item(val accountId: String, val amount: String, val type: String, val createTime: Long)
+    data class Item(val id: String?, val accountId: String, val amount: String, val type: String, val createTime: Long)
 
     companion object {
         fun fromTransfers(transfers: List<Transfer>): TransfersResponse {
             return TransfersResponse(transfers.map {
                 Item(
+                    it.id,
                     it.accountId,
                     it.amount.toPlainString(),
                     it.type.toString(),
