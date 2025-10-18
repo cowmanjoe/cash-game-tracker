@@ -52,6 +52,10 @@ The server will start on `http://localhost:8080`.
 
 ### Option 2: Run with Docker
 
+**Note**: To run both frontend and backend together, use `docker-compose` from the project root. See the [main README](../README.md) for instructions.
+
+To run only the server container:
+
 #### Build Docker Image
 
 ```bash
@@ -62,20 +66,6 @@ docker build -t cash-game-tracker-server:latest .
 
 ```bash
 docker run -p 8080:8080 cash-game-tracker-server:latest
-```
-
-#### Or use Docker Compose (run both frontend and backend)
-
-From the project root directory:
-
-```bash
-docker-compose up -d
-```
-
-To stop all containers:
-
-```bash
-docker-compose down
 ```
 
 The server will be available at `http://localhost:8080`.

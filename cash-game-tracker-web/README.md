@@ -51,6 +51,10 @@ npm start
 
 ### Option 2: Run with Docker
 
+**Note**: To run both frontend and backend together, use `docker-compose` from the project root. See the [main README](../README.md) for instructions.
+
+To run only the web container:
+
 #### Build Docker Image
 
 ```bash
@@ -61,20 +65,6 @@ docker build -t cash-game-tracker-web:latest .
 
 ```bash
 docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=http://localhost:8080 cash-game-tracker-web:latest
-```
-
-#### Or use Docker Compose (run both frontend and backend)
-
-From the project root directory:
-
-```bash
-docker-compose up -d
-```
-
-To stop all containers:
-
-```bash
-docker-compose down
 ```
 
 The application will be available at [http://localhost:3000](http://localhost:3000).

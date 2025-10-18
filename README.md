@@ -11,24 +11,52 @@ cash-game-tracker/
 └── docker-compose.yml           # Orchestrates both services
 ```
 
-## Quick Start with Docker
+## Quick Start with Docker Compose
 
 The easiest way to run the entire application is with Docker Compose:
 
 ```bash
 # Start both frontend and backend
 docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop all services
-docker-compose down
 ```
 
 After starting, access:
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8080
+
+### Docker Compose Commands
+
+```bash
+# Start services in detached mode
+docker-compose up -d
+
+# Start services with live logs
+docker-compose up
+
+# View logs
+docker-compose logs -f
+
+# View logs for specific service
+docker-compose logs -f web
+docker-compose logs -f server
+
+# Stop all services
+docker-compose down
+
+# Rebuild images and start
+docker-compose up -d --build
+
+# Stop and remove all containers, networks, and volumes
+docker-compose down -v
+```
+
+### What's Included
+
+The `docker-compose.yml` file orchestrates:
+- **Backend (server)**: Kotlin/Spring Boot API on port 8080
+- **Frontend (web)**: Next.js application on port 3000
+- **Networking**: Shared network for service communication
+- **Auto-restart**: Services restart automatically on failure
 
 ## Components
 
@@ -37,18 +65,18 @@ After starting, access:
 - **Port**: 8080
 - **Features**: REST API for accounts, games, transactions, and balances
 
-See [cash-game-tracker-server/README.md](cash-game-tracker-server/README.md) for details.
+See [cash-game-tracker-server/README.md](cash-game-tracker-server/README.md) for development setup and standalone Docker commands.
 
 ### Frontend (cash-game-tracker-web)
 - **Technology**: Next.js 15, React 19, TypeScript, Tailwind CSS
 - **Port**: 3000
 - **Features**: Game hosting, transaction tracking, balance viewing
 
-See [cash-game-tracker-web/README.md](cash-game-tracker-web/README.md) for details.
+See [cash-game-tracker-web/README.md](cash-game-tracker-web/README.md) for development setup and standalone Docker commands.
 
 ## Development
 
-### Running Individually
+### Running Services Individually
 
 **Backend:**
 ```bash
@@ -63,23 +91,16 @@ npm install
 npm run dev
 ```
 
-### Building for Production
+### Production Build (without Docker)
 
-**With Docker:**
-```bash
-docker-compose build
-docker-compose up -d
-```
-
-**Without Docker:**
-
-Backend:
+**Backend:**
 ```bash
 cd cash-game-tracker-server
 ./gradlew build
+java -jar build/libs/*.jar
 ```
 
-Frontend:
+**Frontend:**
 ```bash
 cd cash-game-tracker-web
 npm run build
@@ -88,12 +109,20 @@ npm start
 
 ## Features
 
-- Create and join cash games
-- Track buy-ins and cash-outs for players
-- View real-time player balances
-- Edit transaction amounts
-- Secure JWT-based sessions
-- Responsive mobile-friendly interface
+- **Game Management**: Create and join cash games with unique IDs
+- **Transaction Tracking**: Record buy-ins and cash-outs for all players
+- **Real-time Balances**: View current net winnings/losses for each player
+- **Transaction Editing**: Update amounts for existing transactions
+- **Secure Sessions**: JWT-based authentication with httpOnly cookies
+- **Responsive Design**: Mobile-friendly interface built with Tailwind CSS
+
+## Architecture
+
+This is a standard client-server architecture:
+- **Backend**: RESTful API built with Spring Boot, uses embedded H2 database
+- **Frontend**: Server-side rendered Next.js application with React Server Components
+- **Communication**: HTTP/JSON API calls from frontend to backend
+- **State**: Session state managed via encrypted JWT tokens
 
 ## License
 
