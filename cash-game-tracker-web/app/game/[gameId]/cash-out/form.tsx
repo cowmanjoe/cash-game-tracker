@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useActionState, useState } from "react";
 import { updateCashOutAction } from "./actions";
 
-export default function CashOutForm({ game, activeAccountId }: { game: Game, activeAccountId: string }) {
+export default function CashOutForm({ game, activeAccountId, existingAmount }: { game: Game, activeAccountId: string, existingAmount?: string }) {
   const [isLoading, setLoading] = useState(false);
   const [state, formAction] = useActionState(updateCashOutAction, {});
 
@@ -45,6 +45,7 @@ export default function CashOutForm({ game, activeAccountId }: { game: Game, act
                 id="amount"
                 name="amount"
                 placeholder="Amount"
+                defaultValue={existingAmount}
                 required
               />
               <input id="gameId" name="gameId" value={game.id} type="hidden" />
