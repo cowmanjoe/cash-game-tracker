@@ -26,13 +26,15 @@ A modern web application for tracking cash game transactions, buy-ins, cash-outs
 
 ## Getting Started
 
-### Installation
+### Option 1: Run with Node.js
+
+#### Installation
 
 ```bash
 npm install
 ```
 
-### Development
+#### Development
 
 ```bash
 npm run dev
@@ -40,12 +42,40 @@ npm run dev
 
 The application will start on [http://localhost:3000](http://localhost:3000).
 
-### Build for Production
+#### Build for Production
 
 ```bash
 npm run build
 npm start
 ```
+
+### Option 2: Run with Docker
+
+#### Build Docker Image
+
+```bash
+docker build -t cash-game-tracker-web:latest .
+```
+
+#### Run Docker Container
+
+```bash
+docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=http://localhost:8080 cash-game-tracker-web:latest
+```
+
+#### Or use Docker Compose
+
+```bash
+docker-compose up -d
+```
+
+To stop the container:
+
+```bash
+docker-compose down
+```
+
+The application will be available at [http://localhost:3000](http://localhost:3000).
 
 ## How It Works
 

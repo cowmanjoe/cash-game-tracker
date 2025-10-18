@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  cash-game-tracker-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cash-game-tracker-web:latest
+    container_name: cash-game-tracker-web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      # Add your API backend URL here
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    restart: unless-stopped
