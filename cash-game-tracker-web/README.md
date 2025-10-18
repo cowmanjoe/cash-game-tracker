@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Cash Game Tracker Web
+
+A modern web application for tracking cash game transactions, buy-ins, cash-outs, and player balances during poker or cash game sessions.
+
+## Features
+
+- **Host or Join Games**: Create new games or join existing ones
+- **Transaction Tracking**: Record and view buy-ins and cash-outs for all players
+- **Balance Management**: View real-time player balances
+- **Transaction Editing**: Update transaction amounts when needed
+- **Secure Sessions**: JWT-based authentication with httpOnly cookies
+- **Responsive Design**: Mobile-friendly interface
+
+## Technology Stack
+
+- **Next.js 15** (App Router) - React meta-framework with server-side rendering
+- **React 19** - UI library
+- **TypeScript** - Static type checking
+- **Tailwind CSS** - Utility-first CSS framework
+- **jose** - JWT encryption and session management
+
+## Prerequisites
+
+- Node.js 20 or higher
+- Backend server running on `http://localhost:8080`
 
 ## Getting Started
 
-First, run the development server:
+### Installation
+
+```bash
+npm install
+```
+
+### Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will start on [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## How It Works
 
-To learn more about Next.js, take a look at the following resources:
+1. **Create or Join**: Users can either host a new game or join an existing one
+2. **Track Transactions**: Add buy-ins when players purchase chips and cash-outs when they leave
+3. **View Balances**: See real-time balances for all players in the game
+4. **Edit as Needed**: Update transaction amounts if corrections are needed
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Architecture
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+This is a Next.js application that communicates with a backend REST API. It uses:
 
-## Deploy on Vercel
+- Server-side rendering for optimal performance
+- Server actions for form submissions
+- Encrypted JWT sessions stored in httpOnly cookies
+- Cache revalidation for real-time data updates
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Configuration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The backend API URL is currently set to `http://localhost:8080`. Update the session secret in production before deployment.
