@@ -28,7 +28,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - BACKEND_API_URL=http://server:8080
     depends_on:
       - server
