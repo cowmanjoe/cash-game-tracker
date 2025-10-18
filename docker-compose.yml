@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Backend API server
+  server:
+    build:
+      context: ./cash-game-tracker-server
+      dockerfile: Dockerfile
+    image: cash-game-tracker-server:latest
+    container_name: cash-game-tracker-server
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    restart: unless-stopped
+    networks:
+      - cash-game-tracker-network
+
+  # Frontend web application
+  web:
+    build:
+      context: ./cash-game-tracker-web
+      dockerfile: Dockerfile
+    image: cash-game-tracker-web:latest
+    container_name: cash-game-tracker-web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    depends_on:
+      - server
+    restart: unless-stopped
+    networks:
+      - cash-game-tracker-network
+
+networks:
+  cash-game-tracker-network:
+    driver: bridge

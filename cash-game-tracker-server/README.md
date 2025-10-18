@@ -64,13 +64,15 @@ docker build -t cash-game-tracker-server:latest .
 docker run -p 8080:8080 cash-game-tracker-server:latest
 ```
 
-#### Or use Docker Compose
+#### Or use Docker Compose (run both frontend and backend)
+
+From the project root directory:
 
 ```bash
 docker-compose up -d
 ```
 
-To stop the container:
+To stop all containers:
 
 ```bash
 docker-compose down

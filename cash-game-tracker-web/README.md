@@ -63,13 +63,15 @@ docker build -t cash-game-tracker-web:latest .
 docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=http://localhost:8080 cash-game-tracker-web:latest
 ```
 
-#### Or use Docker Compose
+#### Or use Docker Compose (run both frontend and backend)
+
+From the project root directory:
 
 ```bash
 docker-compose up -d
 ```
 
-To stop the container:
+To stop all containers:
 
 ```bash
 docker-compose down
