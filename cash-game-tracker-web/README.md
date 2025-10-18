@@ -26,6 +26,21 @@ A modern web application for tracking cash game transactions, buy-ins, cash-outs
 
 ## Getting Started
 
+### Configuration
+
+The backend API URL is configured via the `BACKEND_API_URL` environment variable:
+
+1. **Local Development**: Create a `.env.local` file (already included):
+   ```bash
+   BACKEND_API_URL=http://localhost:8080
+   ```
+
+2. **Docker Deployment**: The docker-compose file automatically sets this to `http://server:8080` to use the Docker network
+
+3. **Production**: Set the environment variable to your production backend URL
+
+See `.env.example` for reference.
+
 ### Option 1: Run with Node.js
 
 #### Installation
@@ -63,8 +78,16 @@ docker build -t cash-game-tracker-web:latest .
 
 #### Run Docker Container
 
+You can customize the backend URL at build time or runtime:
+
+**Build with custom API URL:**
 ```bash
-docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=http://localhost:8080 cash-game-tracker-web:latest
+docker build --build-arg BACKEND_API_URL=http://your-backend:8080 -t cash-game-tracker-web:latest .
+```
+
+**Run with environment variable:**
+```bash
+docker run -p 3000:3000 -e BACKEND_API_URL=http://localhost:8080 cash-game-tracker-web:latest
 ```
 
 The application will be available at [http://localhost:3000](http://localhost:3000).

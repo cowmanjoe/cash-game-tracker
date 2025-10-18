@@ -4,7 +4,7 @@ import { revalidateTag } from "next/cache";
 import { Balances, Game, Transfers } from "./game";
 import { ServerResponse } from "./response";
 
-const baseUrl = 'http://localhost:8080';
+const baseUrl = process.env.BACKEND_API_URL || 'http://localhost:8080';
 
 export async function getGame(id: string): Promise<ServerResponse<Game>> {
   return sendRequest(`/game/${id}`, { next: { tags: ['game'] } })

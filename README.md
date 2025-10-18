@@ -24,6 +24,8 @@ After starting, access:
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8080
 
+The docker-compose configuration automatically sets up the correct network communication between services using `http://server:8080` for internal container-to-container calls.
+
 ### Docker Compose Commands
 
 ```bash
@@ -55,8 +57,27 @@ docker-compose down -v
 The `docker-compose.yml` file orchestrates:
 - **Backend (server)**: Kotlin/Spring Boot API on port 8080
 - **Frontend (web)**: Next.js application on port 3000
-- **Networking**: Shared network for service communication
+- **Networking**: Shared network for service communication (frontend uses `http://server:8080` to reach backend)
 - **Auto-restart**: Services restart automatically on failure
+- **Environment Configuration**: Backend URL automatically configured for Docker networking
+
+## Configuration
+
+### Backend API URL
+
+The frontend needs to know where to reach the backend API. This is configured differently for each deployment scenario:
+
+| Environment | Configuration | Backend URL |
+|------------|---------------|-------------|
+| **Local Development** | `.env.local` file | `http://localhost:8080` |
+| **Docker Compose** | Automatic (via docker-compose.yml) | `http://server:8080` |
+| **Production** | Environment variable | Your production backend URL |
+
+**For local development**, the `.env.local` file is already configured with `BACKEND_API_URL=http://localhost:8080`.
+
+**For Docker Compose**, the configuration is automatic - no changes needed.
+
+**For production deployment**, set the `BACKEND_API_URL` environment variable to your backend URL.
 
 ## Components
 

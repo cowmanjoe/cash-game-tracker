@@ -1,7 +1,7 @@
 import { Account } from "./account";
 import { ServerResponse } from "./response";
 
-const baseUrl = 'http://localhost:8080';
+const baseUrl = process.env.BACKEND_API_URL || 'http://localhost:8080';
 
 export function getAccount(id: string): Promise<ServerResponse<Account>> {
   return sendRequest(`/account/${id}`, { next: { tags: ['account'] } });

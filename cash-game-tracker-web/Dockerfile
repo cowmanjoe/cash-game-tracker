@@ -20,6 +20,10 @@ COPY . .
 # Next.js collects anonymous telemetry data - disable it
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Build argument for backend API URL (can be overridden at build time)
+ARG BACKEND_API_URL=http://localhost:8080
+ENV BACKEND_API_URL=$BACKEND_API_URL
+
 # Build the Next.js application
 RUN npm run build
 
@@ -51,6 +55,9 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+
+# Backend API URL can be overridden at runtime
+ENV BACKEND_API_URL=http://localhost:8080
 
 # Run the application
 CMD ["node", "server.js"]

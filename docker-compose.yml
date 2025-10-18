@@ -21,13 +21,15 @@ services:
     build:
       context: ./cash-game-tracker-web
       dockerfile: Dockerfile
+      args:
+        - BACKEND_API_URL=http://server:8080
     image: cash-game-tracker-web:latest
     container_name: cash-game-tracker-web
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - BACKEND_API_URL=http://server:8080
     depends_on:
       - server
     restart: unless-stopped
