@@ -28,8 +28,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
       - BACKEND_API_URL=http://server:8080
+      - SECURE_COOKIES=${SECURE_COOKIES:-false}
     depends_on:
       - server
     restart: unless-stopped

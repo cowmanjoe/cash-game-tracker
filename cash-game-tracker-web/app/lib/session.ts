@@ -30,10 +30,15 @@ export async function createSession(accountId: string) {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   const session = await encrypt({ accountId, expiresAt })
 
+  // Use SECURE_COOKIES env var to control cookie security, defaulting to true
+  const secureCookies = process.env.SECURE_COOKIES !== 'false';
+
+  console.log(`SECURE_COOKIES=${process.env.SECURE_COOKIES}, secureCookies=${secureCookies}`);
   console.log(session);
+
   cookies().set('session', session, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: secureCookies,
     expires: expiresAt,
     sameSite: 'lax',
     path: '/',

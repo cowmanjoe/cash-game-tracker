@@ -59,5 +59,8 @@ ENV HOSTNAME="0.0.0.0"
 # Backend API URL can be overridden at runtime
 ENV BACKEND_API_URL=http://localhost:8080
 
+# Secure cookies flag - set to 'false' for HTTP deployments, defaults to true (secure)
+ENV SECURE_COOKIES=true
+
 # Run the application
 CMD ["node", "server.js"]
