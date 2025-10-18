@@ -1,0 +1,27 @@
+# Build output
+build/
+.gradle/
+bin/
+out/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+TODO.md
+
+# Gradle wrapper jar (we want to use the container's gradle)
+gradle/wrapper/gradle-wrapper.jar

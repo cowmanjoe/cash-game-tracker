@@ -28,13 +28,15 @@ A Spring Boot backend application for managing cash game transactions, player ac
 
 ## Getting Started
 
-### Build
+### Option 1: Run with Gradle
+
+#### Build
 
 ```bash
 ./gradlew build
 ```
 
-### Run
+#### Run
 
 ```bash
 ./gradlew bootRun
@@ -42,11 +44,39 @@ A Spring Boot backend application for managing cash game transactions, player ac
 
 The server will start on `http://localhost:8080`.
 
-### Run Tests
+#### Run Tests
 
 ```bash
 ./gradlew test
 ```
+
+### Option 2: Run with Docker
+
+#### Build Docker Image
+
+```bash
+docker build -t cash-game-tracker-server:latest .
+```
+
+#### Run Docker Container
+
+```bash
+docker run -p 8080:8080 cash-game-tracker-server:latest
+```
+
+#### Or use Docker Compose
+
+```bash
+docker-compose up -d
+```
+
+To stop the container:
+
+```bash
+docker-compose down
+```
+
+The server will be available at `http://localhost:8080`.
 
 ## How It Works
 
