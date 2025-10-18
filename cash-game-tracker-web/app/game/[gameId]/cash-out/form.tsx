@@ -8,6 +8,8 @@ import { updateCashOutAction } from "./actions";
 export default function CashOutForm({ game, activeAccountId, existingAmount }: { game: Game, activeAccountId: string, existingAmount?: string }) {
   const [isLoading, setLoading] = useState(false);
   const [state, formAction] = useActionState(updateCashOutAction, {});
+  const [selectedAccountId, setSelectedAccountId] = useState(activeAccountId);
+  const [amount, setAmount] = useState((existingAmount && Number(existingAmount) !== 0) ? existingAmount : '');
 
   async function submitForm(formData: FormData) {
     setLoading(true);
@@ -18,12 +20,15 @@ export default function CashOutForm({ game, activeAccountId, existingAmount }: {
   async function clearCashOut() {
     setLoading(true);
     const formData = new FormData();
-    formData.set('accountId', activeAccountId);
+    formData.set('accountId', selectedAccountId);
     formData.set('amount', '0');
     formData.set('gameId', game.id);
     await formAction(formData);
     setLoading(false);
   }
+
+  const selectedUserCashOut = game.cashOuts[selectedAccountId];
+  const hasNonZeroCashOut = selectedUserCashOut && Number(selectedUserCashOut.amount) !== 0;
 
   return (
     <main className="flex justify-center min-h-screen">
@@ -41,7 +46,13 @@ export default function CashOutForm({ game, activeAccountId, existingAmount }: {
                 className="rounded-lg"
                 id="accountId"
                 name="accountId"
-                defaultValue={activeAccountId}
+                value={selectedAccountId}
+                onChange={(e) => {
+                  const newAccountId = e.target.value;
+                  setSelectedAccountId(newAccountId);
+                  const cashOutAmount = game.cashOuts[newAccountId]?.amount || '';
+                  setAmount((cashOutAmount && Number(cashOutAmount) !== 0) ? cashOutAmount : '');
+                }}
                 required
               >
                 {
@@ -55,7 +66,8 @@ export default function CashOutForm({ game, activeAccountId, existingAmount }: {
                 id="amount"
                 name="amount"
                 placeholder="Amount"
-                defaultValue={existingAmount}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
                 required
               />
               <input id="gameId" name="gameId" value={game.id} type="hidden" />
@@ -65,7 +77,7 @@ export default function CashOutForm({ game, activeAccountId, existingAmount }: {
               </button>
             </div>
           </form>
-          {existingAmount && (
+          {hasNonZeroCashOut && (
             <button type="button" onClick={clearCashOut} disabled={isLoading} className="flex items-center gap-5 rounded-lg bg-red-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-red-400 md:text-base mt-4">
               Clear Cash Out
             </button>
