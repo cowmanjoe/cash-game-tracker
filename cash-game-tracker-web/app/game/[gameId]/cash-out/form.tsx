@@ -15,6 +15,16 @@ export default function CashOutForm({ game, activeAccountId, existingAmount }: {
     setLoading(false);
   }
 
+  async function clearCashOut() {
+    setLoading(true);
+    const formData = new FormData();
+    formData.set('accountId', activeAccountId);
+    formData.set('amount', '0');
+    formData.set('gameId', game.id);
+    await formAction(formData);
+    setLoading(false);
+  }
+
   return (
     <main className="flex justify-center min-h-screen">
       <div className="flex justify-start flex-col m-6 min-w-80 px-6 max-w-64">
@@ -55,6 +65,11 @@ export default function CashOutForm({ game, activeAccountId, existingAmount }: {
               </button>
             </div>
           </form>
+          {existingAmount && (
+            <button type="button" onClick={clearCashOut} disabled={isLoading} className="flex items-center gap-5 rounded-lg bg-red-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-red-400 md:text-base mt-4">
+              Clear Cash Out
+            </button>
+          )}
           {state.error && <p className="m-2 text-red-600">{state.error}</p>}
         </div>
       </div>
