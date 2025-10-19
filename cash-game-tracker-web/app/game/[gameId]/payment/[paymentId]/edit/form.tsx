@@ -26,19 +26,49 @@ export default function EditPaymentForm({ game, payment }: { game: Game, payment
         <div className="flex flex-col justify-center flex-grow">
           <h2 className="text-2xl font-semibold mb-6 text-gray-800">Edit Payment</h2>
           <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="mb-4 pb-4 border-b border-gray-200">
+            <div className="mb-6 pb-4 border-b border-gray-200">
               <p className="text-sm text-gray-600">Player</p>
               <p className="text-lg font-medium text-gray-900">{game.players[payment.accountId].name}</p>
-            </div>
-            <div className="mb-6 pb-4 border-b border-gray-200">
-              <p className="text-sm text-gray-600">Payment Side</p>
-              <p className="text-lg font-medium text-gray-900">
-                {payment.side === 'PAYER' ? 'Paying the house' : 'Receiving from the house'}
-              </p>
             </div>
 
             <form action={submitForm}>
               <div className="flex flex-col justify-items-center gap-6">
+                <div className="flex flex-col gap-3">
+                  <label className="text-sm font-medium text-gray-700">Payment Direction</label>
+                  <div className="flex flex-col gap-3 bg-gray-50 p-4 rounded-lg">
+                    <label className="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors">
+                      <input
+                        type="radio"
+                        name="side"
+                        value="PAYER"
+                        defaultChecked={payment.side === 'PAYER'}
+                        disabled={isLoading}
+                        className="mt-1"
+                        required
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">Paid the house</span>
+                        <span className="text-xs text-gray-600">Player paid money to the house</span>
+                      </div>
+                    </label>
+                    <label className="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors">
+                      <input
+                        type="radio"
+                        name="side"
+                        value="RECIPIENT"
+                        defaultChecked={payment.side === 'RECIPIENT'}
+                        disabled={isLoading}
+                        className="mt-1"
+                        required
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">Received from the house</span>
+                        <span className="text-xs text-gray-600">Player received money from the house</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
                 <div className="flex flex-col gap-2">
                   <label htmlFor="amount" className="text-sm font-medium text-gray-700">
                     Amount ($)

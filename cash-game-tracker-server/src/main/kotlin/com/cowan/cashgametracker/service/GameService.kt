@@ -132,12 +132,13 @@ class GameService(
     }
 
     @Transactional
-    fun updatePayment(gameId: String, paymentId: String, amount: BigDecimal): Game {
+    fun updatePayment(gameId: String, paymentId: String, amount: BigDecimal, side: Payment.Side): Game {
         val gameEntity = gameRepo.getById(gameId)
         val paymentEntity = gameEntity.payments.singleOrNull { it.id == paymentId }
             ?: throw ValidationException("Payment $paymentId not found in game $gameId")
 
         paymentEntity.amount = amount
+        paymentEntity.side = side
 
         gameRepo.save(gameEntity)
 

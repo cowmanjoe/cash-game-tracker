@@ -7,11 +7,12 @@ export interface ActionState {
 
 export async function editPaymentAction(state: ActionState, formData: FormData): Promise<ActionState> {
   const amount = formData.get('amount');
+  const side = formData.get('side');
   const paymentId = formData.get('paymentId');
   const gameId = formData.get('gameId');
 
-  if (!amount || !paymentId || !gameId) {
-    throw Error("Amount, payment ID or game ID was null");
+  if (!amount || !side || !paymentId || !gameId) {
+    throw Error("Amount, side, payment ID or game ID was null");
   }
 
   const amountValue = parseFloat(amount.toString());
@@ -27,9 +28,14 @@ export async function editPaymentAction(state: ActionState, formData: FormData):
     return { error: 'Payment amount cannot exceed $100,000.00' };
   }
 
-  console.log(`amount: ${amount}`)
+  const sideValue = side.toString();
+  if (sideValue !== 'PAYER' && sideValue !== 'RECIPIENT') {
+    return { error: 'Invalid payment side' };
+  }
 
-  const updateResponse = await updatePayment(gameId.toString(), paymentId.toString(), amount.toString());
+  console.log(`amount: ${amount}, side: ${side}`)
+
+  const updateResponse = await updatePayment(gameId.toString(), paymentId.toString(), amount.toString(), sideValue);
 
   if (updateResponse.isError) {
     const errorMessage = updateResponse.error.message || 'Failed to update payment. Please try again.';

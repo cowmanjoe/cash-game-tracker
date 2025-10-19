@@ -17,7 +17,7 @@ export async function addPaymentAction(state: ActionState, formData: FormData): 
   }
 
   if (side !== 'PAYER' && side !== 'RECIPIENT') {
-    return { error: 'Please select whether you are paying or receiving from the house', game: state.game };
+    return { error: 'Please select whether you paid or received from the house', game: state.game };
   }
 
   const amountValue = parseFloat(amount.toString());

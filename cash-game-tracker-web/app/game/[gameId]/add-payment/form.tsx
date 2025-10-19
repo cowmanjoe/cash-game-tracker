@@ -72,7 +72,7 @@ export default function AddPaymentForm({
                       required
                     />
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900">I am paying the house</span>
+                      <span className="text-sm font-medium text-gray-900">I paid the house</span>
                       <span className="text-xs text-gray-600">Reduces your debt (if negative balance)</span>
                     </div>
                   </label>
@@ -87,7 +87,7 @@ export default function AddPaymentForm({
                       required
                     />
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900">I am receiving from the house</span>
+                      <span className="text-sm font-medium text-gray-900">I received from the house</span>
                       <span className="text-xs text-gray-600">Settles what the house owes you (if positive balance)</span>
                     </div>
                   </label>

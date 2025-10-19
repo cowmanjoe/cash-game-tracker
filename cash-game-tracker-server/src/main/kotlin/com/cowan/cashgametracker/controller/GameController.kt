@@ -106,7 +106,8 @@ class GameController(
                 gameService.updatePayment(
                     gameId,
                     paymentId,
-                    currencyAmountService.parse(request.amount)
+                    currencyAmountService.parse(request.amount),
+                    request.side
                 )
             )
         )
@@ -210,7 +211,7 @@ data class CashOutResponse(val amount: String, val time: Long) {
 }
 
 data class AddPaymentRequest(val accountId: String, val amount: String, val side: Payment.Side)
-data class UpdatePaymentRequest(val amount: String)
+data class UpdatePaymentRequest(val amount: String, val side: Payment.Side)
 
 data class PaymentResponse(
     val id: String,

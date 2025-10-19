@@ -11,6 +11,6 @@ data class PaymentEntity(
     val accountId: String,
     var amount: BigDecimal,
     val createTime: Instant,
-    val side: Payment.Side,
+    var side: Payment.Side,
     @Id var id: String? = null
 )

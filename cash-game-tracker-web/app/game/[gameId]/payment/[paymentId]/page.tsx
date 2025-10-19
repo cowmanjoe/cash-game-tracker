@@ -67,7 +67,7 @@ export default async function PaymentPage(props: { params: { gameId: string, pay
                 {payment.side === 'PAYER' ? '↑' : '↓'}
               </span>
               <p className="text-lg">
-                PAYMENT ({payment.side === 'PAYER' ? 'Paying House' : 'Receiving from House'})
+                PAYMENT ({payment.side === 'PAYER' ? 'Paid House' : 'Received from House'})
               </p>
             </div>
           </div>

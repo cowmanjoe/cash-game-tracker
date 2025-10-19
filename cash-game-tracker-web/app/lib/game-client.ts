@@ -98,11 +98,12 @@ export async function addPayment(gameId: string, accountId: string, amount: stri
   return gameResponse;
 }
 
-export async function updatePayment(gameId: string, paymentId: string, amount: string): Promise<ServerResponse<Game>> {
+export async function updatePayment(gameId: string, paymentId: string, amount: string, side: string): Promise<ServerResponse<Game>> {
   const gameResponse = await sendRequest<Game>(`/game/${gameId}/payment/${paymentId}`, {
     method: 'PUT',
     body: JSON.stringify({
-      amount
+      amount,
+      side
     }),
     headers: {
       'Content-Type': 'application/json'

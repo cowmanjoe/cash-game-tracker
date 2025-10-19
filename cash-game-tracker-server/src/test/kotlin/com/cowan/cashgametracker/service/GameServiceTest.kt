@@ -218,7 +218,7 @@ class GameServiceTest {
         val game = gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(100), Payment.Side.PAYER)
         val paymentId = game.payments[0].id
 
-        val updatedGame = gameService.updatePayment(GAME_ID, paymentId, BigDecimal(150))
+        val updatedGame = gameService.updatePayment(GAME_ID, paymentId, BigDecimal(150), Payment.Side.PAYER)
 
         assertEquals(1, updatedGame.payments.size)
         val payment = updatedGame.payments.single { it.id == paymentId }
@@ -233,9 +233,9 @@ class GameServiceTest {
         val game = gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(100), Payment.Side.PAYER)
         val paymentId = game.payments[0].id
 
-        gameService.updatePayment(GAME_ID, paymentId, BigDecimal(150))
-        gameService.updatePayment(GAME_ID, paymentId, BigDecimal(200))
-        val finalGame = gameService.updatePayment(GAME_ID, paymentId, BigDecimal(250))
+        gameService.updatePayment(GAME_ID, paymentId, BigDecimal(150), Payment.Side.PAYER)
+        gameService.updatePayment(GAME_ID, paymentId, BigDecimal(200), Payment.Side.PAYER)
+        val finalGame = gameService.updatePayment(GAME_ID, paymentId, BigDecimal(250), Payment.Side.RECIPIENT)
 
         assertEquals(1, finalGame.payments.size)
         val payment = finalGame.payments.single { it.id == paymentId }
@@ -245,21 +245,21 @@ class GameServiceTest {
     @Test
     fun test_updatePayment_nonExistentPayment_throwsValidationException() {
         assertThrows<ValidationException> {
-            gameService.updatePayment(GAME_ID, "nonExistentPaymentId", BigDecimal(100))
+            gameService.updatePayment(GAME_ID, "nonExistentPaymentId", BigDecimal(100), Payment.Side.PAYER)
         }
     }
 
     @Test
-    fun test_updatePayment_preservesSideAndAccountId() {
+    fun test_updatePayment_canChangeSide() {
         gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
         val game = gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(100), Payment.Side.RECIPIENT)
         val paymentId = game.payments[0].id
 
-        val updatedGame = gameService.updatePayment(GAME_ID, paymentId, BigDecimal(200))
+        val updatedGame = gameService.updatePayment(GAME_ID, paymentId, BigDecimal(200), Payment.Side.PAYER)
 
         val payment = updatedGame.payments.single { it.id == paymentId }
         assertEquals(ACCOUNT_ID1, payment.accountId)
-        assertEquals(Payment.Side.RECIPIENT, payment.side)
+        assertEquals(Payment.Side.PAYER, payment.side)
         assertEquals(0, BigDecimal(200).compareTo(payment.amount))
     }
 
