@@ -13,12 +13,27 @@ export async function editPaymentAction(state: ActionState, formData: FormData):
   if (!amount || !paymentId || !gameId) {
     throw Error("Amount, payment ID or game ID was null");
   }
+
+  const amountValue = parseFloat(amount.toString());
+  if (isNaN(amountValue)) {
+    return { error: 'Please enter a valid amount' };
+  }
+
+  if (amountValue <= 0) {
+    return { error: 'Payment amount must be greater than $0.00' };
+  }
+
+  if (amountValue > 100000) {
+    return { error: 'Payment amount cannot exceed $100,000.00' };
+  }
+
   console.log(`amount: ${amount}`)
 
   const updateResponse = await updatePayment(gameId.toString(), paymentId.toString(), amount.toString());
 
   if (updateResponse.isError) {
-    return { error: updateResponse.error.message || 'Unknown error occurred' }
+    const errorMessage = updateResponse.error.message || 'Failed to update payment. Please try again.';
+    return { error: errorMessage }
   } else {
     redirect(`/game/${gameId.toString()}/payment/${paymentId.toString()}`)
   }

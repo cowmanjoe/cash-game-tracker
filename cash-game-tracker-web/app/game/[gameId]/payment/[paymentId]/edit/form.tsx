@@ -2,41 +2,90 @@
 
 import { Payment, Game } from "@/app/lib/game";
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { editPaymentAction } from "./actions";
 
 export default function EditPaymentForm({ game, payment }: { game: Game, payment: Payment }) {
+  const [isLoading, setLoading] = useState(false);
   const [actionState, formAction] = useActionState(editPaymentAction, {});
 
+  async function submitForm(formData: FormData) {
+    setLoading(true);
+    await formAction(formData);
+    setLoading(false);
+  }
+
   return (
-    <main className="flex justify-center h-screen">
-      <div className="flex justify-start flex-col m-6 px-6 w-80">
-        <Link href={`/game/${game.id}`}>
-          <div className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
-            Back
+    <main className="flex justify-center min-h-screen bg-gray-50">
+      <div className="flex justify-start flex-col m-6 px-6 w-80 max-w-md">
+        <Link href={`/game/${game.id}/payment/${payment.id}`}>
+          <div className="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-400 mb-6">
+            ← Back
           </div>
         </Link>
         <div className="flex flex-col justify-center flex-grow">
-          <form action={formAction}>
-            <div className="flex flex-col justify-items-center gap-6">
-              <input
-                className="rounded-lg"
-                id="amount"
-                name="amount"
-                placeholder="Amount"
-                defaultValue={payment.amount}
-                required
-              />
-
-              <button type="submit" className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
-                Edit payment
-              </button>
-
-              <input id="gameId" name="gameId" value={game.id} type="hidden" />
-              <input id="paymentId" name="paymentId" value={payment.id} type="hidden" />
+          <h2 className="text-2xl font-semibold mb-6 text-gray-800">Edit Payment</h2>
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="mb-4 pb-4 border-b border-gray-200">
+              <p className="text-sm text-gray-600">Player</p>
+              <p className="text-lg font-medium text-gray-900">{game.players[payment.accountId].name}</p>
             </div>
-          </form>
-          {actionState.error && <p className="m-2 text-red-600">{actionState.error}</p>}
+            <div className="mb-6 pb-4 border-b border-gray-200">
+              <p className="text-sm text-gray-600">Payment Side</p>
+              <p className="text-lg font-medium text-gray-900">
+                {payment.side === 'PAYER' ? 'Paying the house' : 'Receiving from the house'}
+              </p>
+            </div>
+
+            <form action={submitForm}>
+              <div className="flex flex-col justify-items-center gap-6">
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="amount" className="text-sm font-medium text-gray-700">
+                    Amount ($)
+                  </label>
+                  <input
+                    className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    id="amount"
+                    name="amount"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    max="100000"
+                    placeholder="0.00"
+                    defaultValue={payment.amount}
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex items-center justify-center gap-2 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Updating...
+                    </>
+                  ) : (
+                    'Update Payment'
+                  )}
+                </button>
+
+                <input id="gameId" name="gameId" value={game.id} type="hidden" />
+                <input id="paymentId" name="paymentId" value={payment.id} type="hidden" />
+              </div>
+            </form>
+            {actionState.error && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{actionState.error}</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </main>

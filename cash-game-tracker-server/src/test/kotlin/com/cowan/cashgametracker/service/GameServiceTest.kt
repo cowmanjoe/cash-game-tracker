@@ -29,7 +29,8 @@ class GameServiceTest {
 
     private val mockGameRepo = mockk<GameRepository>()
     private val mockAccountService = mockk<AccountService>()
-    private val gameService = GameService(mockGameRepo, mockAccountService)
+    private val currencyAmountService = com.cowan.cashgametracker.util.CurrencyAmountService()
+    private val gameService = GameService(mockGameRepo, mockAccountService, currencyAmountService)
 
     private val gameEntities = mutableMapOf<String, GameEntity>()
     private val gameEntity = GameEntity(GAME_CREATE_TIME, id = GAME_ID)
@@ -110,7 +111,7 @@ class GameServiceTest {
         val game = gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal.TEN)
 
         assertEquals(1, game.cashOutsByAccountId.size)
-        assertEquals(BigDecimal.TEN, game.cashOutsByAccountId.getValue(ACCOUNT_ID1).amount)
+        assertEquals(BigDecimal("10.00"), game.cashOutsByAccountId.getValue(ACCOUNT_ID1).amount)
         assertEquals(ACCOUNT_ID1, game.cashOutsByAccountId.getValue(ACCOUNT_ID1).accountId)
     }
 
@@ -123,7 +124,7 @@ class GameServiceTest {
         val game = gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(50))
 
         assertEquals(1, game.cashOutsByAccountId.size)
-        assertEquals(BigDecimal(50), game.cashOutsByAccountId.getValue(ACCOUNT_ID1).amount)
+        assertEquals(BigDecimal("50.00"), game.cashOutsByAccountId.getValue(ACCOUNT_ID1).amount)
         assertEquals(ACCOUNT_ID1, game.cashOutsByAccountId.getValue(ACCOUNT_ID1).accountId)
     }
 
@@ -145,10 +146,10 @@ class GameServiceTest {
 
         assertEquals(2, game.cashOutsByAccountId.size)
 
-        assertEquals(BigDecimal(80), game.cashOutsByAccountId.getValue(ACCOUNT_ID1).amount)
+        assertEquals(BigDecimal("80.00"), game.cashOutsByAccountId.getValue(ACCOUNT_ID1).amount)
         assertEquals(ACCOUNT_ID1, game.cashOutsByAccountId.getValue(ACCOUNT_ID1).accountId)
 
-        assertEquals(BigDecimal(35), game.cashOutsByAccountId.getValue(ACCOUNT_ID2).amount)
+        assertEquals(BigDecimal("35.00"), game.cashOutsByAccountId.getValue(ACCOUNT_ID2).amount)
         assertEquals(ACCOUNT_ID2, game.cashOutsByAccountId.getValue(ACCOUNT_ID2).accountId)
     }
 

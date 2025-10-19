@@ -14,13 +14,18 @@ import com.cowan.cashgametracker.model.Payment
 import com.cowan.cashgametracker.model.Transfer
 import com.cowan.cashgametracker.model.ValidationException
 import com.cowan.cashgametracker.repository.GameRepository
+import com.cowan.cashgametracker.util.CurrencyAmountService
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.Instant
 
 @Component
-class GameService(private val gameRepo: GameRepository, private val accountService: AccountService) {
+class GameService(
+    private val gameRepo: GameRepository,
+    private val accountService: AccountService,
+    private val currencyAmountService: CurrencyAmountService
+) {
 
     fun getGame(id: String): Game {
         val gameEntity = gameRepo.getById(id)
@@ -158,7 +163,7 @@ class GameService(private val gameRepo: GameRepository, private val accountServi
         return BuyIn(
             EntityUtil.requireNotNullId(buyInEntity.id),
             buyInEntity.accountId,
-            buyInEntity.amount,
+            currencyAmountService.round(buyInEntity.amount),
             buyInEntity.createTime
         )
     }
@@ -180,7 +185,7 @@ class GameService(private val gameRepo: GameRepository, private val accountServi
     private fun convertEntity(cashOutEntity: CashOutEntity): CashOut {
         return CashOut(
             cashOutEntity.accountId,
-            cashOutEntity.amount,
+            currencyAmountService.round(cashOutEntity.amount),
             cashOutEntity.createTime
         )
     }
@@ -189,7 +194,7 @@ class GameService(private val gameRepo: GameRepository, private val accountServi
         return Payment(
             EntityUtil.requireNotNullId(paymentEntity.id),
             paymentEntity.accountId,
-            paymentEntity.amount,
+            currencyAmountService.round(paymentEntity.amount),
             paymentEntity.createTime,
             paymentEntity.side
         )

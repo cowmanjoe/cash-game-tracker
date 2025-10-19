@@ -34,18 +34,18 @@ export default async function PaymentPage(props: { params: { gameId: string, pay
   const time = new Date(payment.time);
 
   return (
-    <main className="flex justify-center">
-      <div className="flex flex-col md:w-96 w-full p-12">
-        <div className="flex justify-between p-2">
+    <main className="flex justify-center min-h-screen bg-gray-50">
+      <div className="flex flex-col md:w-96 w-full p-6 md:p-12">
+        <div className="flex justify-between mb-6">
           <Link href={`/game/${game.id}`}>
-            <div className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
-              Back
+            <div className="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-400">
+              ← Back
             </div>
           </Link>
 
           <div className="flex gap-2">
             <Link href={`/game/${game.id}/payment/${payment.id}/edit`}>
-              <div className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
+              <div className="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-400">
                 Edit
               </div>
             </Link>
@@ -58,11 +58,40 @@ export default async function PaymentPage(props: { params: { gameId: string, pay
             />
           </div>
         </div>
-        <div className="py-8">
-          <p className="text-2xl p-5">{game.players[payment.accountId].name}</p>
-          <p className="text-xl p-3 text-gray-600">PAYMENT ({payment.side})</p>
-          <p className={`text-5xl p-3 font-semibold ${payment.side === 'PAYER' ? 'text-red-600' : 'text-green-600'}`}>${payment.amount}</p>
-          <p className="flex justify-end">{DAYS[time.getDay()]} {time.toISOString().slice(11, 16)}</p>
+
+        <div className="bg-white rounded-lg shadow-md p-8">
+          <div className="border-b border-gray-200 pb-6 mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{game.players[payment.accountId].name}</h1>
+            <div className="flex items-center gap-2 text-gray-600">
+              <span className={`text-2xl ${payment.side === 'PAYER' ? 'text-red-600' : 'text-green-600'}`}>
+                {payment.side === 'PAYER' ? '↑' : '↓'}
+              </span>
+              <p className="text-lg">
+                PAYMENT ({payment.side === 'PAYER' ? 'Paying House' : 'Receiving from House'})
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Amount</p>
+              <p className={`text-5xl font-bold ${payment.side === 'PAYER' ? 'text-red-600' : 'text-green-600'}`}>
+                ${payment.amount}
+              </p>
+            </div>
+
+            <div className="pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-600 mb-1">Date & Time</p>
+              <p className="text-lg text-gray-900">
+                {DAYS[time.getDay()]}, {time.toLocaleDateString()} at {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            </div>
+
+            <div className="pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-600 mb-1">Payment ID</p>
+              <p className="text-sm text-gray-500 font-mono">{payment.id}</p>
+            </div>
+          </div>
         </div>
       </div>
     </main>

@@ -37,70 +37,111 @@ export default function AddPaymentForm({
         </Link>
 
         <div className="flex flex-col justify-center flex-grow">
+          <h2 className="text-2xl font-semibold mb-6 text-gray-800">Record Payment</h2>
           <form action={submitForm}>
             <div className="flex flex-col justify-items-center gap-6">
-              <select
-                className="rounded-lg"
-                id="accountId"
-                name="accountId"
-                defaultValue={activeAccountId}
-                required
-              >
-                {
-                  Object.keys(game.players).map(accountId => (
-                    <option key={accountId} value={accountId}>{game.players[accountId].name}</option>
-                  ))
-                }
-              </select>
-
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-gray-700">Payment Side</label>
-                <div className="flex flex-col gap-2">
-                  <label className="flex items-center gap-2">
+                <label htmlFor="accountId" className="text-sm font-medium text-gray-700">Player</label>
+                <select
+                  className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  id="accountId"
+                  name="accountId"
+                  defaultValue={activeAccountId}
+                  disabled={isLoading}
+                  required
+                >
+                  {
+                    Object.keys(game.players).map(accountId => (
+                      <option key={accountId} value={accountId}>{game.players[accountId].name}</option>
+                    ))
+                  }
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <label className="text-sm font-medium text-gray-700">Payment Direction</label>
+                <div className="flex flex-col gap-3 bg-gray-50 p-4 rounded-lg">
+                  <label className="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors">
                     <input
                       type="radio"
                       name="side"
                       value="PAYER"
                       defaultChecked={defaultSide === 'PAYER'}
+                      disabled={isLoading}
+                      className="mt-1"
                       required
                     />
-                    <span className="text-sm">I am paying the house</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-gray-900">I am paying the house</span>
+                      <span className="text-xs text-gray-600">Reduces your debt (if negative balance)</span>
+                    </div>
                   </label>
-                  <label className="flex items-center gap-2">
+                  <label className="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors">
                     <input
                       type="radio"
                       name="side"
                       value="RECIPIENT"
                       defaultChecked={defaultSide === 'RECIPIENT'}
+                      disabled={isLoading}
+                      className="mt-1"
                       required
                     />
-                    <span className="text-sm">I am receiving from the house</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-gray-900">I am receiving from the house</span>
+                      <span className="text-xs text-gray-600">Settles what the house owes you (if positive balance)</span>
+                    </div>
                   </label>
                 </div>
               </div>
 
-              <input
-                className="rounded-lg"
-                id="amount"
-                name="amount"
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="Amount"
-                defaultValue={defaultAmount}
-                required
-              />
+              <div className="flex flex-col gap-2">
+                <label htmlFor="amount" className="text-sm font-medium text-gray-700">
+                  Amount ($)
+                  {currentBalance !== 0 && (
+                    <span className="ml-2 text-xs text-gray-500">
+                      (Current balance: ${Math.abs(currentBalance).toFixed(2)} {currentBalance < 0 ? 'owed' : 'to receive'})
+                    </span>
+                  )}
+                </label>
+                <input
+                  className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  id="amount"
+                  name="amount"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  max="100000"
+                  placeholder="0.00"
+                  defaultValue={defaultAmount}
+                  disabled={isLoading}
+                  required
+                />
+              </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Record Payment
+                {isLoading ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Recording...
+                  </>
+                ) : (
+                  'Record Payment'
+                )}
               </button>
             </div>
           </form>
-          {state.error && <p className="m-2 text-red-600">{state.error}</p>}
+          {state.error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600">{state.error}</p>
+            </div>
+          )}
         </div>
       </div>
     </main>

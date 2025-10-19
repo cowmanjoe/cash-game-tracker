@@ -18,7 +18,8 @@ export async function deletePaymentAction({ gameId, paymentId }: {
   const deleteResponse = await deletePayment(gameId, paymentId);
 
   if (deleteResponse.isError) {
-    return { error: deleteResponse.error.message || 'Unknown error occurred' }
+    const errorMessage = deleteResponse.error.message || 'Failed to cancel payment. Please try again.';
+    return { error: errorMessage }
   } else {
     redirect(`/game/${gameId}`)
   }

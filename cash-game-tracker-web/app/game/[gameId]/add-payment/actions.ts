@@ -17,12 +17,20 @@ export async function addPaymentAction(state: ActionState, formData: FormData): 
   }
 
   if (side !== 'PAYER' && side !== 'RECIPIENT') {
-    return { error: 'Invalid payment side', game: state.game };
+    return { error: 'Please select whether you are paying or receiving from the house', game: state.game };
   }
 
   const amountValue = parseFloat(amount.toString());
-  if (isNaN(amountValue) || amountValue <= 0) {
-    return { error: 'Amount must be greater than 0', game: state.game };
+  if (isNaN(amountValue)) {
+    return { error: 'Please enter a valid amount', game: state.game };
+  }
+
+  if (amountValue <= 0) {
+    return { error: 'Payment amount must be greater than $0.00', game: state.game };
+  }
+
+  if (amountValue > 100000) {
+    return { error: 'Payment amount cannot exceed $100,000.00', game: state.game };
   }
 
   console.log(`amount: ${amount}, side: ${side}`);
@@ -35,7 +43,8 @@ export async function addPaymentAction(state: ActionState, formData: FormData): 
   );
 
   if (response.isError) {
-    return { error: response.error.message || 'Unknown error occurred', game: state.game };
+    const errorMessage = response.error.message || 'Failed to record payment. Please try again.';
+    return { error: errorMessage, game: state.game };
   } else {
     redirect(`/game/${response.data.id}`);
   }

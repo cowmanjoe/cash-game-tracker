@@ -7,6 +7,7 @@ import com.cowan.cashgametracker.model.Game
 import com.cowan.cashgametracker.model.Payment
 import com.cowan.cashgametracker.model.Transfer
 import com.cowan.cashgametracker.service.GameService
+import com.cowan.cashgametracker.util.CurrencyAmountService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -18,7 +19,10 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("game")
-class GameController(private val gameService: GameService) : BaseController() {
+class GameController(
+    private val gameService: GameService,
+    private val currencyAmountService: CurrencyAmountService
+) : BaseController() {
 
     @GetMapping("{id}")
     fun getGame(@PathVariable("id") id: String): ServerResponse<GameResponse> {
@@ -40,7 +44,7 @@ class GameController(private val gameService: GameService) : BaseController() {
                 gameService.addBuyIn(
                     gameId,
                     request.accountId,
-                    DataTranslator.toBigDecimal(request.amount)
+                    currencyAmountService.parse(request.amount)
                 )
             )
         )
@@ -56,7 +60,7 @@ class GameController(private val gameService: GameService) : BaseController() {
                 gameService.updateCashOut(
                     gameId,
                     request.accountId,
-                    DataTranslator.toBigDecimal(request.amount)
+                    currencyAmountService.parse(request.amount)
                 )
             )
         )
@@ -72,7 +76,7 @@ class GameController(private val gameService: GameService) : BaseController() {
                 gameService.addPayment(
                     gameId,
                     request.accountId,
-                    DataTranslator.toBigDecimal(request.amount),
+                    currencyAmountService.parse(request.amount),
                     request.side
                 )
             )
@@ -102,7 +106,7 @@ class GameController(private val gameService: GameService) : BaseController() {
                 gameService.updatePayment(
                     gameId,
                     paymentId,
-                    DataTranslator.toBigDecimal(request.amount)
+                    currencyAmountService.parse(request.amount)
                 )
             )
         )
@@ -139,7 +143,7 @@ class GameController(private val gameService: GameService) : BaseController() {
                 gameService.updateBuyIn(
                     gameId,
                     buyInId,
-                    DataTranslator.toBigDecimal(request.amount)
+                    currencyAmountService.parse(request.amount)
                 )
             )
         )

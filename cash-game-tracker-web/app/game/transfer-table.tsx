@@ -21,7 +21,14 @@ export default function TransferTable({ game, transfers: transactions }: { game:
 
   function getTransferTypeDisplay(transfer: Transfer) {
     if (transfer.type === "PAYMENT" && transfer.side) {
-      return `PAYMENT (${transfer.side})`;
+      return (
+        <div className="flex items-center gap-2">
+          <span className={`text-lg ${transfer.side === "PAYER" ? "text-red-600" : "text-green-600"}`}>
+            {transfer.side === "PAYER" ? "↑" : "↓"}
+          </span>
+          <span>PAYMENT ({transfer.side})</span>
+        </div>
+      );
     }
     return transfer.type;
   }
@@ -33,8 +40,12 @@ export default function TransferTable({ game, transfers: transactions }: { game:
     return "text-gray-900";
   }
 
-  function getRowHoverClass() {
-    return "hover:bg-gray-50 cursor-pointer";
+  function getRowHoverClass(transfer: Transfer) {
+    const baseClass = "hover:bg-gray-50 cursor-pointer transition-colors";
+    if (transfer.type === "PAYMENT") {
+      return `${baseClass} ${transfer.side === "PAYER" ? "hover:bg-red-50" : "hover:bg-green-50"}`;
+    }
+    return baseClass;
   }
 
   return (
@@ -50,7 +61,7 @@ export default function TransferTable({ game, transfers: transactions }: { game:
       <tbody className="bg-white divide-y divide-gray-200">
         {
           transactions.map((transfer, i) => (
-            <tr key={i} onClick={() => router.push(getTransferUrl(transfer))} className={getRowHoverClass()}>
+            <tr key={i} onClick={() => router.push(getTransferUrl(transfer))} className={getRowHoverClass(transfer)}>
               <td className="px-6 py-4 whitespace-nowrap">{getTransferTypeDisplay(transfer)}</td>
               <td className={`px-6 py-4 whitespace-nowrap font-semibold ${getAmountColor(transfer)}`}>${transfer.amount}</td>
               <td className="px-6 py-4 whitespace-nowrap">{game.players[transfer.accountId].name}</td>
