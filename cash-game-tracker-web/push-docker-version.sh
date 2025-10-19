@@ -12,6 +12,9 @@ ECS_CLUSTER="cash-game-tracker-cluster"
 ECS_SERVICE="cash-game-tracker-web-service-cset8cqj"
 TASK_DEFINITION_FAMILY="cash-game-tracker-web"
 
+echo "Logging in to ECR..."
+aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+
 echo "Building Docker image..."
 docker build -t $IMAGE_NAME $SCRIPT_DIR
 
