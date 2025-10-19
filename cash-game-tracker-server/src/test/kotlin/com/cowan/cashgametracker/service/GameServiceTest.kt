@@ -5,6 +5,7 @@ import com.cowan.cashgametracker.entity.GameEntity
 import com.cowan.cashgametracker.model.Account
 import com.cowan.cashgametracker.model.Payment
 import com.cowan.cashgametracker.model.PlayerNotInGameException
+import com.cowan.cashgametracker.model.SettlementStatus
 import com.cowan.cashgametracker.model.Transfer
 import com.cowan.cashgametracker.model.ValidationException
 import com.cowan.cashgametracker.repository.GameRepository
@@ -369,6 +370,149 @@ class GameServiceTest {
         assertEquals(2, balances.size)
         assertEquals(0, balances.single { it.accountId == ACCOUNT_ID1 }.chipBalance.compareTo(BigDecimal(-60)))
         assertEquals(0, balances.single { it.accountId == ACCOUNT_ID2 }.chipBalance.compareTo(BigDecimal(60)))
+    }
+
+    @Test
+    fun test_getBalances_loserWithNoPayment_showsUnsettled() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(50))
+
+        val balances = gameService.getBalances(GAME_ID)
+        val balance = balances.single { it.accountId == ACCOUNT_ID1 }
+
+        assertEquals(0, balance.chipBalance.compareTo(BigDecimal(-50))) // Lost $50
+        assertEquals(0, balance.paymentBalance.compareTo(BigDecimal.ZERO)) // No payments
+        assertEquals(0, balance.outstanding.compareTo(BigDecimal(-50))) // Still owes $50
+        assertEquals(SettlementStatus.UNSETTLED, balance.status)
+    }
+
+    @Test
+    fun test_getBalances_loserWithFullPayment_showsSettled() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(50))
+        gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(50), Payment.Side.PAYER)
+
+        val balances = gameService.getBalances(GAME_ID)
+        val balance = balances.single { it.accountId == ACCOUNT_ID1 }
+
+        assertEquals(0, balance.chipBalance.compareTo(BigDecimal(-50))) // Lost $50
+        assertEquals(0, balance.paymentBalance.compareTo(BigDecimal(50))) // Paid $50
+        assertEquals(0, balance.outstanding.compareTo(BigDecimal.ZERO)) // Settled
+        assertEquals(SettlementStatus.SETTLED, balance.status)
+    }
+
+    @Test
+    fun test_getBalances_loserWithPartialPayment_showsUnsettled() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(50))
+        gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(30), Payment.Side.PAYER)
+
+        val balances = gameService.getBalances(GAME_ID)
+        val balance = balances.single { it.accountId == ACCOUNT_ID1 }
+
+        assertEquals(0, balance.chipBalance.compareTo(BigDecimal(-50))) // Lost $50
+        assertEquals(0, balance.paymentBalance.compareTo(BigDecimal(30))) // Paid $30
+        assertEquals(0, balance.outstanding.compareTo(BigDecimal(-20))) // Still owes $20
+        assertEquals(SettlementStatus.UNSETTLED, balance.status)
+    }
+
+    @Test
+    fun test_getBalances_loserWithOverpayment_showsOverpaid() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(50))
+        gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(60), Payment.Side.PAYER)
+
+        val balances = gameService.getBalances(GAME_ID)
+        val balance = balances.single { it.accountId == ACCOUNT_ID1 }
+
+        assertEquals(0, balance.chipBalance.compareTo(BigDecimal(-50))) // Lost $50
+        assertEquals(0, balance.paymentBalance.compareTo(BigDecimal(60))) // Paid $60
+        assertEquals(0, balance.outstanding.compareTo(BigDecimal(10))) // Overpaid by $10
+        assertEquals(SettlementStatus.OVERPAID, balance.status)
+    }
+
+    @Test
+    fun test_getBalances_winnerWithNoPayment_showsUnsettled() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(50))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
+
+        val balances = gameService.getBalances(GAME_ID)
+        val balance = balances.single { it.accountId == ACCOUNT_ID1 }
+
+        assertEquals(0, balance.chipBalance.compareTo(BigDecimal(50))) // Won $50
+        assertEquals(0, balance.paymentBalance.compareTo(BigDecimal.ZERO)) // No payments
+        assertEquals(0, balance.outstanding.compareTo(BigDecimal(50))) // Owed $50
+        assertEquals(SettlementStatus.UNSETTLED, balance.status)
+    }
+
+    @Test
+    fun test_getBalances_winnerWithFullPayment_showsSettled() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(50))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
+        gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(50), Payment.Side.RECIPIENT)
+
+        val balances = gameService.getBalances(GAME_ID)
+        val balance = balances.single { it.accountId == ACCOUNT_ID1 }
+
+        assertEquals(0, balance.chipBalance.compareTo(BigDecimal(50))) // Won $50
+        assertEquals(0, balance.paymentBalance.compareTo(BigDecimal(-50))) // Received $50
+        assertEquals(0, balance.outstanding.compareTo(BigDecimal.ZERO)) // Settled
+        assertEquals(SettlementStatus.SETTLED, balance.status)
+    }
+
+    @Test
+    fun test_getBalances_winnerWithPartialPayment_showsUnsettled() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(50))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
+        gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(30), Payment.Side.RECIPIENT)
+
+        val balances = gameService.getBalances(GAME_ID)
+        val balance = balances.single { it.accountId == ACCOUNT_ID1 }
+
+        assertEquals(0, balance.chipBalance.compareTo(BigDecimal(50))) // Won $50
+        assertEquals(0, balance.paymentBalance.compareTo(BigDecimal(-30))) // Received $30
+        assertEquals(0, balance.outstanding.compareTo(BigDecimal(20))) // Still owed $20
+        assertEquals(SettlementStatus.UNSETTLED, balance.status)
+    }
+
+    @Test
+    fun test_getBalances_winnerWithOverpayment_showsOverpaid() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(50))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
+        gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(60), Payment.Side.RECIPIENT)
+
+        val balances = gameService.getBalances(GAME_ID)
+        val balance = balances.single { it.accountId == ACCOUNT_ID1 }
+
+        assertEquals(0, balance.chipBalance.compareTo(BigDecimal(50))) // Won $50
+        assertEquals(0, balance.paymentBalance.compareTo(BigDecimal(-60))) // Received $60
+        assertEquals(0, balance.outstanding.compareTo(BigDecimal(-10))) // Received $10 too much
+        assertEquals(SettlementStatus.OVERPAID, balance.status)
+    }
+
+    @Test
+    fun test_getBalances_multiplePayments_calculatesCorrectly() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(50))
+        gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(20), Payment.Side.PAYER)
+        gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(30), Payment.Side.PAYER)
+
+        val balances = gameService.getBalances(GAME_ID)
+        val balance = balances.single { it.accountId == ACCOUNT_ID1 }
+
+        assertEquals(0, balance.chipBalance.compareTo(BigDecimal(-50))) // Lost $50
+        assertEquals(0, balance.paymentBalance.compareTo(BigDecimal(50))) // Paid $20 + $30 = $50
+        assertEquals(0, balance.outstanding.compareTo(BigDecimal.ZERO)) // Settled
+        assertEquals(SettlementStatus.SETTLED, balance.status)
     }
 
     @Test

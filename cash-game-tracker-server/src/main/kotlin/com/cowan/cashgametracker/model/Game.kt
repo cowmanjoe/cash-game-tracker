@@ -43,11 +43,13 @@ class Game(val id: String, val createTime: Instant, val decimals: Int) {
             val cashOutAmount = cashOutsByAccountId[accountId]?.amount ?: BigDecimal.ZERO
             val chipBalance = cashOutAmount - buyInTotal
 
-            // Calculate payment balance (net of payments received vs paid)
+            // Calculate payment balance (payments reduce outstanding balance)
+            // PAYER: money paid out (reduces debt, so positive in payment balance)
+            // RECIPIENT: money received (reduces what's owed to you, so negative in payment balance)
             val userPayments = payments.filter { it.accountId == accountId }
             val paidOut = userPayments.filter { it.side == Payment.Side.PAYER }.sumOf { it.amount }
             val received = userPayments.filter { it.side == Payment.Side.RECIPIENT }.sumOf { it.amount }
-            val paymentBalance = received - paidOut
+            val paymentBalance = paidOut - received
 
             // Calculate outstanding and status
             val outstanding = chipBalance + paymentBalance
