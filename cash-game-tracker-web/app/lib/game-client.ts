@@ -64,7 +64,7 @@ export async function getTransfers(gameId: string): Promise<ServerResponse<Trans
 }
 
 export async function updateCashOut(gameId: string, accountId: string, amount: string): Promise<ServerResponse<Game>> {
-  const gameResponse = await sendRequest<Game>(`/game/${gameId}/cash-out`, { 
+  const gameResponse = await sendRequest<Game>(`/game/${gameId}/cash-out`, {
     method: 'PUT',
     body: JSON.stringify({
       accountId,
@@ -73,6 +73,50 @@ export async function updateCashOut(gameId: string, accountId: string, amount: s
     headers: {
       'Content-Type': 'application/json'
     },
+  });
+
+  revalidateTag('game');
+
+  return gameResponse;
+}
+
+export async function addPayment(gameId: string, accountId: string, amount: string, side: 'PAYER' | 'RECIPIENT'): Promise<ServerResponse<Game>> {
+  const gameResponse = await sendRequest<Game>(`/game/${gameId}/payment`, {
+    method: 'POST',
+    body: JSON.stringify({
+      accountId,
+      amount,
+      side
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  });
+
+  revalidateTag('game');
+
+  return gameResponse;
+}
+
+export async function updatePayment(gameId: string, paymentId: string, amount: string): Promise<ServerResponse<Game>> {
+  const gameResponse = await sendRequest<Game>(`/game/${gameId}/payment/${paymentId}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      amount
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  });
+
+  revalidateTag('game');
+
+  return gameResponse;
+}
+
+export async function deletePayment(gameId: string, paymentId: string): Promise<ServerResponse<Game>> {
+  const gameResponse = await sendRequest<Game>(`/game/${gameId}/payment/${paymentId}`, {
+    method: 'DELETE'
   });
 
   revalidateTag('game');

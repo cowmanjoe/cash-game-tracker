@@ -11,10 +11,30 @@ export default function TransferTable({ game, transfers: transactions }: { game:
       case "BUY_IN":
         return `/game/${game.id}/buy-in/${transfer.id}`;
       case "CASH_OUT":
-        return `/game/${game.id}/cash-out/${transfer.accountId}`
+        return `/game/${game.id}/cash-out/${transfer.accountId}`;
+      case "PAYMENT":
+        return `/game/${game.id}/payment/${transfer.id}`;
       default:
         throw Error(`Unexpected transfer type: ${transfer.type}`);
     }
+  }
+
+  function getTransferTypeDisplay(transfer: Transfer) {
+    if (transfer.type === "PAYMENT" && transfer.side) {
+      return `PAYMENT (${transfer.side})`;
+    }
+    return transfer.type;
+  }
+
+  function getAmountColor(transfer: Transfer) {
+    if (transfer.type === "PAYMENT") {
+      return transfer.side === "PAYER" ? "text-red-600" : "text-green-600";
+    }
+    return "text-gray-900";
+  }
+
+  function getRowHoverClass() {
+    return "hover:bg-gray-50 cursor-pointer";
   }
 
   return (
@@ -30,13 +50,13 @@ export default function TransferTable({ game, transfers: transactions }: { game:
       <tbody className="bg-white divide-y divide-gray-200">
         {
           transactions.map((transfer, i) => (
-            <tr key={i} onClick={() => router.push(getTransferUrl(transfer))} className="">
-              <td className="px-6 py-4 whitespace-nowrap">{transfer.type}</td>
-              <td className="px-6 py-4 whitespace-nowrap">${transfer.amount}</td>
+            <tr key={i} onClick={() => router.push(getTransferUrl(transfer))} className={getRowHoverClass()}>
+              <td className="px-6 py-4 whitespace-nowrap">{getTransferTypeDisplay(transfer)}</td>
+              <td className={`px-6 py-4 whitespace-nowrap font-semibold ${getAmountColor(transfer)}`}>${transfer.amount}</td>
               <td className="px-6 py-4 whitespace-nowrap">{game.players[transfer.accountId].name}</td>
             </tr>
           ))}
-          
+
       </tbody>
     </table>
   )

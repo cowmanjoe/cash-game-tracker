@@ -23,7 +23,7 @@ export interface CashOut {
 
 export interface Payment {
   id: string;
-  accountid: string;
+  accountId: string;
   amount: string;
   time: number;
   side: "PAYER" | "RECIPIENT";
@@ -49,4 +49,5 @@ export interface Transfer {
   amount: string;
   accountId: string;
   time: number;
+  side?: "PAYER" | "RECIPIENT";
 }
