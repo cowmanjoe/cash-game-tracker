@@ -5,4 +5,4 @@
 - Allow filtering transfers by player in the transfer table
 - UI on balances page to show the payments. Maybe some kind of visual to indicate the amounts in chips (buy ins and cash outs) vs the amounts in dollars (payments)
 - Make a sticky button for adding a buy in.
-- Clean up UI in join game page.
+- Clean up UI in join game page.- Show "No transactions yet" UI in transfer table when game first created
