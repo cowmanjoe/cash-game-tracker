@@ -1,13 +1,14 @@
 'use client'
 
 import { useActionState } from "react";
+import { PaymentSide } from "@/app/lib/game";
 import { deletePaymentAction } from "./actions";
 
 export default function DeletePaymentButton({ gameId, paymentId, amount, side }: {
   gameId: string,
   paymentId: string,
   amount: string,
-  side: 'PAYER' | 'RECIPIENT'
+  side: PaymentSide
 }) {
   const [state, formAction, isPending] = useActionState(deletePaymentAction, {});
 

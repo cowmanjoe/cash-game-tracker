@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from "next/navigation";
-import { Game, Transfer } from "../lib/game";
+import { Game, Transfer, PaymentSide } from "../lib/game";
 
 export default function TransferTable({ game, transfers: transactions }: { game: Game, transfers: Transfer[]}) {
   const router = useRouter();
@@ -23,8 +23,8 @@ export default function TransferTable({ game, transfers: transactions }: { game:
     if (transfer.type === "PAYMENT" && transfer.side) {
       return (
         <div className="flex items-center gap-2">
-          <span className={`text-lg ${transfer.side === "PAYER" ? "text-red-600" : "text-green-600"}`}>
-            {transfer.side === "PAYER" ? "↑" : "↓"}
+          <span className={`text-lg ${transfer.side === PaymentSide.PAYER ? "text-red-600" : "text-green-600"}`}>
+            {transfer.side === PaymentSide.PAYER ? "↑" : "↓"}
           </span>
           <span>PAYMENT ({transfer.side})</span>
         </div>
@@ -35,7 +35,7 @@ export default function TransferTable({ game, transfers: transactions }: { game:
 
   function getAmountColor(transfer: Transfer) {
     if (transfer.type === "PAYMENT") {
-      return transfer.side === "PAYER" ? "text-red-600" : "text-green-600";
+      return transfer.side === PaymentSide.PAYER ? "text-red-600" : "text-green-600";
     }
     return "text-gray-900";
   }
@@ -43,7 +43,7 @@ export default function TransferTable({ game, transfers: transactions }: { game:
   function getRowHoverClass(transfer: Transfer) {
     const baseClass = "hover:bg-gray-50 cursor-pointer transition-colors";
     if (transfer.type === "PAYMENT") {
-      return `${baseClass} ${transfer.side === "PAYER" ? "hover:bg-red-50" : "hover:bg-green-50"}`;
+      return `${baseClass} ${transfer.side === PaymentSide.PAYER ? "hover:bg-red-50" : "hover:bg-green-50"}`;
     }
     return baseClass;
   }

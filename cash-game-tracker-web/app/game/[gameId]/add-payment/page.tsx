@@ -28,7 +28,7 @@ export default async function AddPaymentPage(props: { params: { gameId: string }
 
   // Find current user's balance
   const userBalance = balances.balances.find(b => b.accountId === sessionPayload.accountId);
-  const balanceValue = userBalance ? parseFloat(userBalance.balance) : 0;
+  const balanceValue = userBalance ? parseFloat(userBalance.chipBalance) : 0;
 
   return (
     <AddPaymentForm

@@ -1,4 +1,4 @@
-import { Payment, Game } from "@/app/lib/game";
+import { Payment, Game, PaymentSide } from "@/app/lib/game";
 import { getGame } from "@/app/lib/game-client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -63,11 +63,11 @@ export default async function PaymentPage(props: { params: { gameId: string, pay
           <div className="border-b border-gray-200 pb-6 mb-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">{game.players[payment.accountId].name}</h1>
             <div className="flex items-center gap-2 text-gray-600">
-              <span className={`text-2xl ${payment.side === 'PAYER' ? 'text-red-600' : 'text-green-600'}`}>
-                {payment.side === 'PAYER' ? '↑' : '↓'}
+              <span className={`text-2xl ${payment.side === PaymentSide.PAYER ? 'text-red-600' : 'text-green-600'}`}>
+                {payment.side === PaymentSide.PAYER ? '↑' : '↓'}
               </span>
               <p className="text-lg">
-                PAYMENT ({payment.side === 'PAYER' ? 'Paid House' : 'Received from House'})
+                PAYMENT ({payment.side === PaymentSide.PAYER ? 'Paid House' : 'Received from House'})
               </p>
             </div>
           </div>
@@ -75,7 +75,7 @@ export default async function PaymentPage(props: { params: { gameId: string, pay
           <div className="space-y-4">
             <div>
               <p className="text-sm text-gray-600 mb-1">Amount</p>
-              <p className={`text-5xl font-bold ${payment.side === 'PAYER' ? 'text-red-600' : 'text-green-600'}`}>
+              <p className={`text-5xl font-bold ${payment.side === PaymentSide.PAYER ? 'text-red-600' : 'text-green-600'}`}>
                 ${payment.amount}
               </p>
             </div>

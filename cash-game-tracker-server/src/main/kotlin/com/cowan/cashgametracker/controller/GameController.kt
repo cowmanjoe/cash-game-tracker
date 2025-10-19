@@ -234,11 +234,27 @@ data class PaymentResponse(
 }
 
 data class BalancesResponse(val balances: List<Item>) {
-    data class Item(val accountId: String, val name: String, val balance: String)
+    data class Item(
+        val accountId: String,
+        val name: String,
+        val chipBalance: String,
+        val paymentBalance: String,
+        val outstanding: String,
+        val status: String
+    )
 
     companion object {
         fun fromBalances(balances: List<Balance>): BalancesResponse {
-            return BalancesResponse(balances.map { Item(it.accountId, it.name, it.balance.toPlainString()) })
+            return BalancesResponse(balances.map {
+                Item(
+                    it.accountId,
+                    it.name,
+                    it.chipBalance.toPlainString(),
+                    it.paymentBalance.toPlainString(),
+                    it.outstanding.toPlainString(),
+                    it.status.toString()
+                )
+            })
         }
     }
 }

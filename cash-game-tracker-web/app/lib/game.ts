@@ -1,5 +1,16 @@
 import { Account } from "./account";
 
+export enum PaymentSide {
+  PAYER = "PAYER",
+  RECIPIENT = "RECIPIENT"
+}
+
+export enum SettlementStatus {
+  SETTLED = "SETTLED",
+  UNSETTLED = "UNSETTLED",
+  OVERPAID = "OVERPAID"
+}
+
 export interface Game {
   id: string;
   createTime: number;
@@ -26,7 +37,7 @@ export interface Payment {
   accountId: string;
   amount: string;
   time: number;
-  side: "PAYER" | "RECIPIENT";
+  side: PaymentSide;
 }
 
 export interface Balances {
@@ -36,10 +47,13 @@ export interface Balances {
 export interface Balance {
   accountId: string;
   name: string;
-  balance: string;
+  chipBalance: string;
+  paymentBalance: string;
+  outstanding: string;
+  status: SettlementStatus;
 }
 
-export interface Transfers { 
+export interface Transfers {
   transfers: Transfer[];
 }
 
@@ -49,5 +63,5 @@ export interface Transfer {
   amount: string;
   accountId: string;
   time: number;
-  side?: "PAYER" | "RECIPIENT";
+  side?: PaymentSide;
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { Payment, Game } from "@/app/lib/game";
+import { Payment, Game, PaymentSide } from "@/app/lib/game";
 import Link from "next/link";
 import { useActionState } from "react";
 import { editPaymentAction } from "./actions";
@@ -33,8 +33,8 @@ export default function EditPaymentForm({ game, payment }: { game: Game, payment
                       <input
                         type="radio"
                         name="side"
-                        value="PAYER"
-                        defaultChecked={payment.side === 'PAYER'}
+                        value={PaymentSide.PAYER}
+                        defaultChecked={payment.side === PaymentSide.PAYER}
                         disabled={isPending}
                         className="mt-1"
                         required
@@ -48,8 +48,8 @@ export default function EditPaymentForm({ game, payment }: { game: Game, payment
                       <input
                         type="radio"
                         name="side"
-                        value="RECIPIENT"
-                        defaultChecked={payment.side === 'RECIPIENT'}
+                        value={PaymentSide.RECIPIENT}
+                        defaultChecked={payment.side === PaymentSide.RECIPIENT}
                         disabled={isPending}
                         className="mt-1"
                         required

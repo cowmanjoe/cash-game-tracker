@@ -1,6 +1,6 @@
 'use client'
 
-import { Game } from "@/app/lib/game"
+import { Game, PaymentSide } from "@/app/lib/game"
 import Link from "next/link"
 import { useActionState } from "react";
 import { addPaymentAction } from "./actions";
@@ -17,7 +17,7 @@ export default function AddPaymentForm({
   const [state, formAction, isPending] = useActionState(addPaymentAction, { game });
 
   // Smart defaults based on current balance
-  const defaultSide = currentBalance < 0 ? 'PAYER' : currentBalance > 0 ? 'RECIPIENT' : 'PAYER';
+  const defaultSide = currentBalance < 0 ? PaymentSide.PAYER : currentBalance > 0 ? PaymentSide.RECIPIENT : PaymentSide.PAYER;
   const defaultAmount = currentBalance !== 0 ? Math.abs(currentBalance).toFixed(2) : '';
 
   return (
@@ -58,8 +58,8 @@ export default function AddPaymentForm({
                     <input
                       type="radio"
                       name="side"
-                      value="PAYER"
-                      defaultChecked={defaultSide === 'PAYER'}
+                      value={PaymentSide.PAYER}
+                      defaultChecked={defaultSide === PaymentSide.PAYER}
                       disabled={isPending}
                       className="mt-1"
                       required
@@ -73,8 +73,8 @@ export default function AddPaymentForm({
                     <input
                       type="radio"
                       name="side"
-                      value="RECIPIENT"
-                      defaultChecked={defaultSide === 'RECIPIENT'}
+                      value={PaymentSide.RECIPIENT}
+                      defaultChecked={defaultSide === PaymentSide.RECIPIENT}
                       disabled={isPending}
                       className="mt-1"
                       required

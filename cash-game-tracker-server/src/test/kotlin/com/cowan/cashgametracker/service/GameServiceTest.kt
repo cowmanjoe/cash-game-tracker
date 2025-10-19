@@ -333,7 +333,7 @@ class GameServiceTest {
         val balances = gameService.getBalances(GAME_ID)
 
         assertEquals(2, balances.size)
-        assertTrue(balances.all { it.balance.compareTo(BigDecimal.ZERO) == 0 })
+        assertTrue(balances.all { it.chipBalance.compareTo(BigDecimal.ZERO) == 0 })
     }
 
     @Test
@@ -348,8 +348,8 @@ class GameServiceTest {
         val balances = gameService.getBalances(GAME_ID)
 
         assertEquals(2, balances.size)
-        assertEquals(0, balances.single { it.accountId == ACCOUNT_ID1 }.balance.compareTo(BigDecimal(-70)))
-        assertEquals(0, balances.single { it.accountId == ACCOUNT_ID2 }.balance.compareTo(BigDecimal(-90)))
+        assertEquals(0, balances.single { it.accountId == ACCOUNT_ID1 }.chipBalance.compareTo(BigDecimal(-70)))
+        assertEquals(0, balances.single { it.accountId == ACCOUNT_ID2 }.chipBalance.compareTo(BigDecimal(-90)))
     }
 
     @Test
@@ -367,8 +367,8 @@ class GameServiceTest {
         val balances = gameService.getBalances(GAME_ID)
 
         assertEquals(2, balances.size)
-        assertEquals(0, balances.single { it.accountId == ACCOUNT_ID1 }.balance.compareTo(BigDecimal(-60)))
-        assertEquals(0, balances.single { it.accountId == ACCOUNT_ID2 }.balance.compareTo(BigDecimal(60)))
+        assertEquals(0, balances.single { it.accountId == ACCOUNT_ID1 }.chipBalance.compareTo(BigDecimal(-60)))
+        assertEquals(0, balances.single { it.accountId == ACCOUNT_ID2 }.chipBalance.compareTo(BigDecimal(60)))
     }
 
     @Test

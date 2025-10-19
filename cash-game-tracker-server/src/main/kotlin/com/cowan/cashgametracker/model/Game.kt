@@ -41,8 +41,45 @@ class Game(val id: String, val createTime: Instant, val decimals: Int) {
         return players.keys.map { accountId ->
             val buyInTotal = buyIns.filter { it.accountId == accountId }.sumOf { it.amount }
             val cashOutAmount = cashOutsByAccountId[accountId]?.amount ?: BigDecimal.ZERO
+            val chipBalance = cashOutAmount - buyInTotal
 
-            Balance(accountId, players.getValue(accountId).name, cashOutAmount - buyInTotal)
+            // Calculate payment balance (net of payments received vs paid)
+            val userPayments = payments.filter { it.accountId == accountId }
+            val paidOut = userPayments.filter { it.side == Payment.Side.PAYER }.sumOf { it.amount }
+            val received = userPayments.filter { it.side == Payment.Side.RECIPIENT }.sumOf { it.amount }
+            val paymentBalance = received - paidOut
+
+            // Calculate outstanding and status
+            val outstanding = chipBalance + paymentBalance
+            val status = determineSettlementStatus(chipBalance, outstanding)
+
+            Balance(
+                accountId,
+                players.getValue(accountId).name,
+                chipBalance,
+                paymentBalance,
+                outstanding,
+                status
+            )
+        }
+    }
+
+    private fun determineSettlementStatus(
+        chipBalance: BigDecimal,
+        outstanding: BigDecimal
+    ): SettlementStatus {
+        val threshold = BigDecimal("0.01")
+
+        return when {
+            outstanding.abs() < threshold -> SettlementStatus.SETTLED
+
+            // Overpaid: owed money but outstanding is positive, or had debt but outstanding is negative
+            (chipBalance < BigDecimal.ZERO && outstanding > BigDecimal.ZERO) ||
+            (chipBalance > BigDecimal.ZERO && outstanding < BigDecimal.ZERO) ->
+                SettlementStatus.OVERPAID
+
+            // Everything else is unsettled
+            else -> SettlementStatus.UNSETTLED
         }
     }
 
