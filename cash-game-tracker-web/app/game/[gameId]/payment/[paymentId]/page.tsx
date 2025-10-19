@@ -2,6 +2,7 @@ import { Payment, Game } from "@/app/lib/game";
 import { getGame } from "@/app/lib/game-client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import DeletePaymentButton from "./delete-button";
 
 const DAYS = [
   'Sun',
@@ -42,11 +43,20 @@ export default async function PaymentPage(props: { params: { gameId: string, pay
             </div>
           </Link>
 
-          <Link href={`/game/${game.id}/payment/${payment.id}/edit`}>
-            <div className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
-              Edit
-            </div>
-          </Link>
+          <div className="flex gap-2">
+            <Link href={`/game/${game.id}/payment/${payment.id}/edit`}>
+              <div className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
+                Edit
+              </div>
+            </Link>
+
+            <DeletePaymentButton
+              gameId={game.id}
+              paymentId={payment.id}
+              amount={payment.amount}
+              side={payment.side}
+            />
+          </div>
         </div>
         <div className="py-8">
           <p className="text-2xl p-5">{game.players[payment.accountId].name}</p>
