@@ -118,6 +118,42 @@ class GameService(private val gameRepo: GameRepository, private val accountServi
         return game.getTransfers()
     }
 
+    fun getPayment(gameId: String, paymentId: String): Payment {
+        val gameEntity = gameRepo.getById(gameId)
+        val paymentEntity = gameEntity.payments.singleOrNull { it.id == paymentId }
+            ?: throw ValidationException("Payment $paymentId not found in game $gameId")
+
+        return convertEntity(paymentEntity)
+    }
+
+    @Transactional
+    fun updatePayment(gameId: String, paymentId: String, amount: BigDecimal): Game {
+        val gameEntity = gameRepo.getById(gameId)
+        val paymentEntity = gameEntity.payments.singleOrNull { it.id == paymentId }
+            ?: throw ValidationException("Payment $paymentId not found in game $gameId")
+
+        paymentEntity.amount = amount
+
+        gameRepo.save(gameEntity)
+
+        return convertEntity(gameEntity)
+    }
+
+    @Transactional
+    fun deletePayment(gameId: String, paymentId: String): Game {
+        val gameEntity = gameRepo.getById(gameId)
+
+        // Validate payment exists before attempting to delete
+        gameEntity.payments.singleOrNull { it.id == paymentId }
+            ?: throw ValidationException("Payment $paymentId not found in game $gameId")
+
+        gameEntity.payments.removeIf { it.id == paymentId }
+
+        gameRepo.save(gameEntity)
+
+        return convertEntity(gameEntity)
+    }
+
     private fun convertEntity(buyInEntity: BuyInEntity): BuyIn {
         return BuyIn(
             EntityUtil.requireNotNullId(buyInEntity.id),

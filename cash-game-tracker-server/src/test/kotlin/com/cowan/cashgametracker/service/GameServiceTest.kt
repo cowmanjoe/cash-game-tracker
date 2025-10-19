@@ -6,6 +6,7 @@ import com.cowan.cashgametracker.model.Account
 import com.cowan.cashgametracker.model.Payment
 import com.cowan.cashgametracker.model.PlayerNotInGameException
 import com.cowan.cashgametracker.model.Transfer
+import com.cowan.cashgametracker.model.ValidationException
 import com.cowan.cashgametracker.repository.GameRepository
 import io.mockk.every
 import io.mockk.mockk
@@ -128,7 +129,7 @@ class GameServiceTest {
 
     @Test
     fun test_updateCashOut_withoutPlayer_throwsException() {
-        val game = assertThrows<PlayerNotInGameException> {
+        assertThrows<PlayerNotInGameException> {
             gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal.TEN)
         }
     }
@@ -184,9 +185,117 @@ class GameServiceTest {
 
     @Test
     fun test_addPayment_withoutPlayer_throwsException() {
-        val game = assertThrows<PlayerNotInGameException> {
+        assertThrows<PlayerNotInGameException> {
             gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal.TEN, Payment.Side.PAYER)
         }
+    }
+
+    @Test
+    fun test_getPayment_existingPayment_returnsPayment() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        val game = gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(100), Payment.Side.PAYER)
+        val paymentId = game.payments[0].id
+
+        val payment = gameService.getPayment(GAME_ID, paymentId)
+
+        assertEquals(paymentId, payment.id)
+        assertEquals(ACCOUNT_ID1, payment.accountId)
+        assertEquals(0, BigDecimal(100).compareTo(payment.amount))
+        assertEquals(Payment.Side.PAYER, payment.side)
+    }
+
+    @Test
+    fun test_getPayment_nonExistentPayment_throwsValidationException() {
+        assertThrows<ValidationException> {
+            gameService.getPayment(GAME_ID, "nonExistentPaymentId")
+        }
+    }
+
+    @Test
+    fun test_updatePayment_existingPayment_updatesAmount() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        val game = gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(100), Payment.Side.PAYER)
+        val paymentId = game.payments[0].id
+
+        val updatedGame = gameService.updatePayment(GAME_ID, paymentId, BigDecimal(150))
+
+        assertEquals(1, updatedGame.payments.size)
+        val payment = updatedGame.payments.single { it.id == paymentId }
+        assertEquals(0, BigDecimal(150).compareTo(payment.amount))
+        assertEquals(ACCOUNT_ID1, payment.accountId)
+        assertEquals(Payment.Side.PAYER, payment.side)
+    }
+
+    @Test
+    fun test_updatePayment_multipleUpdates_latestUpdatePersists() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        val game = gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(100), Payment.Side.PAYER)
+        val paymentId = game.payments[0].id
+
+        gameService.updatePayment(GAME_ID, paymentId, BigDecimal(150))
+        gameService.updatePayment(GAME_ID, paymentId, BigDecimal(200))
+        val finalGame = gameService.updatePayment(GAME_ID, paymentId, BigDecimal(250))
+
+        assertEquals(1, finalGame.payments.size)
+        val payment = finalGame.payments.single { it.id == paymentId }
+        assertEquals(0, BigDecimal(250).compareTo(payment.amount))
+    }
+
+    @Test
+    fun test_updatePayment_nonExistentPayment_throwsValidationException() {
+        assertThrows<ValidationException> {
+            gameService.updatePayment(GAME_ID, "nonExistentPaymentId", BigDecimal(100))
+        }
+    }
+
+    @Test
+    fun test_updatePayment_preservesSideAndAccountId() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        val game = gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(100), Payment.Side.RECIPIENT)
+        val paymentId = game.payments[0].id
+
+        val updatedGame = gameService.updatePayment(GAME_ID, paymentId, BigDecimal(200))
+
+        val payment = updatedGame.payments.single { it.id == paymentId }
+        assertEquals(ACCOUNT_ID1, payment.accountId)
+        assertEquals(Payment.Side.RECIPIENT, payment.side)
+        assertEquals(0, BigDecimal(200).compareTo(payment.amount))
+    }
+
+    @Test
+    fun test_deletePayment_existingPayment_removesPayment() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        val game = gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(100), Payment.Side.PAYER)
+        val paymentId = game.payments[0].id
+
+        val updatedGame = gameService.deletePayment(GAME_ID, paymentId)
+
+        assertEquals(0, updatedGame.payments.size)
+    }
+
+    @Test
+    fun test_deletePayment_nonExistentPayment_throwsValidationException() {
+        assertThrows<ValidationException> {
+            gameService.deletePayment(GAME_ID, "nonExistentPaymentId")
+        }
+    }
+
+    @Test
+    fun test_deletePayment_withMultiplePayments_removesOnlySpecified() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID2)
+
+        gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(100), Payment.Side.PAYER)
+        val game = gameService.addPayment(GAME_ID, ACCOUNT_ID2, BigDecimal(50), Payment.Side.RECIPIENT)
+        val payment1Id = game.payments.first { it.accountId == ACCOUNT_ID1 }.id
+        val payment2Id = game.payments.first { it.accountId == ACCOUNT_ID2 }.id
+
+        val updatedGame = gameService.deletePayment(GAME_ID, payment1Id)
+
+        assertEquals(1, updatedGame.payments.size)
+        assertEquals(payment2Id, updatedGame.payments[0].id)
+        assertEquals(ACCOUNT_ID2, updatedGame.payments[0].accountId)
+        assertEquals(0, BigDecimal(50).compareTo(updatedGame.payments[0].amount))
     }
 
     @Test

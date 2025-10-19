@@ -7,6 +7,7 @@ import com.cowan.cashgametracker.model.Game
 import com.cowan.cashgametracker.model.Payment
 import com.cowan.cashgametracker.model.Transfer
 import com.cowan.cashgametracker.service.GameService
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -74,6 +75,47 @@ class GameController(private val gameService: GameService) : BaseController() {
                     DataTranslator.toBigDecimal(request.amount),
                     request.side
                 )
+            )
+        )
+    }
+
+    @GetMapping("{id}/payment/{paymentId}")
+    fun getPayment(
+        @PathVariable("id") gameId: String,
+        @PathVariable("paymentId") paymentId: String
+    ): ServerResponse<PaymentResponse> {
+        return SuccessServerResponse(
+            PaymentResponse.fromPayment(
+                gameService.getPayment(gameId, paymentId)
+            )
+        )
+    }
+
+    @PutMapping("{id}/payment/{paymentId}")
+    fun updatePayment(
+        @PathVariable("id") gameId: String,
+        @PathVariable("paymentId") paymentId: String,
+        @RequestBody request: UpdatePaymentRequest
+    ): ServerResponse<GameResponse> {
+        return SuccessServerResponse(
+            GameResponse.fromGame(
+                gameService.updatePayment(
+                    gameId,
+                    paymentId,
+                    DataTranslator.toBigDecimal(request.amount)
+                )
+            )
+        )
+    }
+
+    @DeleteMapping("{id}/payment/{paymentId}")
+    fun deletePayment(
+        @PathVariable("id") gameId: String,
+        @PathVariable("paymentId") paymentId: String
+    ): ServerResponse<GameResponse> {
+        return SuccessServerResponse(
+            GameResponse.fromGame(
+                gameService.deletePayment(gameId, paymentId)
             )
         )
     }
@@ -164,6 +206,7 @@ data class CashOutResponse(val amount: String, val time: Long) {
 }
 
 data class AddPaymentRequest(val accountId: String, val amount: String, val side: Payment.Side)
+data class UpdatePaymentRequest(val amount: String)
 
 data class PaymentResponse(
     val id: String,
