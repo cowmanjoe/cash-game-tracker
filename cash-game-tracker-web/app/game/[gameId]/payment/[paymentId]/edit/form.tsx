@@ -2,23 +2,16 @@
 
 import { Payment, Game } from "@/app/lib/game";
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { editPaymentAction } from "./actions";
 
 export default function EditPaymentForm({ game, payment }: { game: Game, payment: Payment }) {
-  const [isLoading, setLoading] = useState(false);
-  const [actionState, formAction] = useActionState(editPaymentAction, {});
-
-  async function submitForm(formData: FormData) {
-    setLoading(true);
-    await formAction(formData);
-    setLoading(false);
-  }
+  const [actionState, formAction, isPending] = useActionState(editPaymentAction, {});
 
   return (
     <main className="flex justify-center min-h-screen bg-gray-50">
       <div className="flex justify-start flex-col m-6 px-6 w-80 max-w-md">
-        <Link href={`/game/${game.id}/payment/${payment.id}`}>
+        <Link href={`/game/${game.id}/payment/${payment.id}`} className={isPending ? 'pointer-events-none opacity-50' : ''}>
           <div className="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-400 mb-6">
             ← Back
           </div>
@@ -31,7 +24,7 @@ export default function EditPaymentForm({ game, payment }: { game: Game, payment
               <p className="text-lg font-medium text-gray-900">{game.players[payment.accountId].name}</p>
             </div>
 
-            <form action={submitForm}>
+            <form action={formAction}>
               <div className="flex flex-col justify-items-center gap-6">
                 <div className="flex flex-col gap-3">
                   <label className="text-sm font-medium text-gray-700">Payment Direction</label>
@@ -42,7 +35,7 @@ export default function EditPaymentForm({ game, payment }: { game: Game, payment
                         name="side"
                         value="PAYER"
                         defaultChecked={payment.side === 'PAYER'}
-                        disabled={isLoading}
+                        disabled={isPending}
                         className="mt-1"
                         required
                       />
@@ -57,7 +50,7 @@ export default function EditPaymentForm({ game, payment }: { game: Game, payment
                         name="side"
                         value="RECIPIENT"
                         defaultChecked={payment.side === 'RECIPIENT'}
-                        disabled={isLoading}
+                        disabled={isPending}
                         className="mt-1"
                         required
                       />
@@ -83,17 +76,17 @@ export default function EditPaymentForm({ game, payment }: { game: Game, payment
                     max="100000"
                     placeholder="0.00"
                     defaultValue={payment.amount}
-                    disabled={isLoading}
+                    disabled={isPending}
                     required
                   />
                 </div>
 
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isPending}
                   className="flex items-center justify-center gap-2 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? (
+                  {isPending ? (
                     <>
                       <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

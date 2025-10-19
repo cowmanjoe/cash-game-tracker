@@ -2,7 +2,7 @@
 
 import { Game } from "@/app/lib/game"
 import Link from "next/link"
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { addPaymentAction } from "./actions";
 
 export default function AddPaymentForm({
@@ -14,23 +14,16 @@ export default function AddPaymentForm({
   activeAccountId: string,
   currentBalance: number
 }) {
-  const [isLoading, setLoading] = useState(false);
-  const [state, formAction] = useActionState(addPaymentAction, { game });
+  const [state, formAction, isPending] = useActionState(addPaymentAction, { game });
 
   // Smart defaults based on current balance
   const defaultSide = currentBalance < 0 ? 'PAYER' : currentBalance > 0 ? 'RECIPIENT' : 'PAYER';
   const defaultAmount = currentBalance !== 0 ? Math.abs(currentBalance).toFixed(2) : '';
 
-  async function submitForm(formData: FormData) {
-    setLoading(true);
-    await formAction(formData)
-    setLoading(false);
-  }
-
   return (
     <main className="flex justify-center min-h-screen">
       <div className="flex justify-start flex-col m-6 min-w-80 px-6 max-w-64">
-        <Link href={`/game/${game.id}`}>
+        <Link href={`/game/${game.id}`} className={isPending ? 'pointer-events-none opacity-50' : ''}>
           <div className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
             Back
           </div>
@@ -38,7 +31,7 @@ export default function AddPaymentForm({
 
         <div className="flex flex-col justify-center flex-grow">
           <h2 className="text-2xl font-semibold mb-6 text-gray-800">Record Payment</h2>
-          <form action={submitForm}>
+          <form action={formAction}>
             <div className="flex flex-col justify-items-center gap-6">
               <div className="flex flex-col gap-2">
                 <label htmlFor="accountId" className="text-sm font-medium text-gray-700">Player</label>
@@ -47,7 +40,7 @@ export default function AddPaymentForm({
                   id="accountId"
                   name="accountId"
                   defaultValue={activeAccountId}
-                  disabled={isLoading}
+                  disabled={isPending}
                   required
                 >
                   {
@@ -67,7 +60,7 @@ export default function AddPaymentForm({
                       name="side"
                       value="PAYER"
                       defaultChecked={defaultSide === 'PAYER'}
-                      disabled={isLoading}
+                      disabled={isPending}
                       className="mt-1"
                       required
                     />
@@ -82,7 +75,7 @@ export default function AddPaymentForm({
                       name="side"
                       value="RECIPIENT"
                       defaultChecked={defaultSide === 'RECIPIENT'}
-                      disabled={isLoading}
+                      disabled={isPending}
                       className="mt-1"
                       required
                     />
@@ -113,17 +106,17 @@ export default function AddPaymentForm({
                   max="100000"
                   placeholder="0.00"
                   defaultValue={defaultAmount}
-                  disabled={isLoading}
+                  disabled={isPending}
                   required
                 />
               </div>
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isPending}
                 className="flex items-center justify-center gap-2 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? (
+                {isPending ? (
                   <>
                     <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

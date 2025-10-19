@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react";
+import { useActionState } from "react";
 import { deletePaymentAction } from "./actions";
 
 export default function DeletePaymentButton({ gameId, paymentId, amount, side }: {
@@ -9,35 +9,30 @@ export default function DeletePaymentButton({ gameId, paymentId, amount, side }:
   amount: string,
   side: 'PAYER' | 'RECIPIENT'
 }) {
-  const [error, setError] = useState<string | undefined>();
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [state, formAction, isPending] = useActionState(deletePaymentAction, {});
 
-  const handleDelete = async () => {
+  const handleDelete = (e: React.FormEvent) => {
+    e.preventDefault();
     const confirmed = window.confirm(
       `Are you sure you want to cancel this payment?\n\nAmount: $${amount}\nSide: ${side}\n\nThis action cannot be undone.`
     );
 
     if (confirmed) {
-      setIsDeleting(true);
-      setError(undefined);
-      const result = await deletePaymentAction({ gameId, paymentId });
-      if (result?.error) {
-        setError(result.error);
-        setIsDeleting(false);
-      }
-      // If successful, redirect happens in the action, so no need to set isDeleting to false
+      const formData = new FormData();
+      formData.set('gameId', gameId);
+      formData.set('paymentId', paymentId);
+      formAction(formData);
     }
   };
 
   return (
-    <div>
+    <form onSubmit={handleDelete}>
       <button
-        type="button"
-        onClick={handleDelete}
-        disabled={isDeleting}
+        type="submit"
+        disabled={isPending}
         className="flex items-center justify-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isDeleting ? (
+        {isPending ? (
           <>
             <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -50,7 +45,7 @@ export default function DeletePaymentButton({ gameId, paymentId, amount, side }:
         )}
       </button>
 
-      {error && <p className="mt-2 text-red-600 text-sm">{error}</p>}
-    </div>
+      {state.error && <p className="mt-2 text-red-600 text-sm">{state.error}</p>}
+    </form>
   );
 }
