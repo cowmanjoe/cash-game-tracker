@@ -51,7 +51,8 @@ aws ecs update-service \
   --service $ECS_SERVICE \
   --task-definition $TASK_DEFINITION_FAMILY:$NEW_REVISION \
   --force-new-deployment \
-  --region $AWS_REGION
+  --region $AWS_REGION \
+  --no-cli-pager
 
 echo "Deployment initiated successfully!"
 echo "Monitor deployment status with: aws ecs describe-services --cluster $ECS_CLUSTER --services $ECS_SERVICE --region $AWS_REGION"
