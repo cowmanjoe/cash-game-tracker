@@ -1,8 +1,8 @@
 # TODO
 
-- Edit payment page should allow editing the payment side
+- Add more stats to the house panel in Balances page
 - Make the transfer viewing pages consistent, modeled after the payment page
 - Allow filtering transfers by player in the transfer table
-- UI on balances page to show the payments. Maybe some kind of visual to indicate the amounts in chips (buy ins and cash outs) vs the amounts in dollars (payments)
 - Make a sticky button for adding a buy in.
-- Clean up UI in join game page.- Show "No transactions yet" UI in transfer table when game first created
+- Clean up UI in join game page.
+- Show "No transactions yet" UI in transfer table when game first created
