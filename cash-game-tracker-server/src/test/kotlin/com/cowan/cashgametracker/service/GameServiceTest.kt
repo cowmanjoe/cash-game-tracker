@@ -528,25 +528,28 @@ class GameServiceTest {
     }
 
     @Test
-    fun test_getHouseBalance_winnersAndLosers_mirrorsPlayerBalances() {
+    fun test_getHouseBalance_balancedGame_showsZeroNetOutstanding() {
         gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
         gameService.addPlayer(GAME_ID, ACCOUNT_ID2)
 
-        // Alice: buy-in $100, cash-out $150 → chip balance +$50 (winner)
+        // Alice: buy-in $100, cash-out $150 → outstanding +$50 (house owes Alice)
         gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
         gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(150))
 
-        // Bob: buy-in $100, cash-out $50 → chip balance -$50 (loser)
+        // Bob: buy-in $100, cash-out $50 → outstanding -$50 (Bob owes house)
         gameService.addBuyIn(GAME_ID, ACCOUNT_ID2, BigDecimal(100))
         gameService.updateCashOut(GAME_ID, ACCOUNT_ID2, BigDecimal(50))
 
         val game = gameService.getGame(GAME_ID)
         val houseBalance = game.getHouseBalance()
 
-        // House should have zero chip balance (winner +$50, loser -$50 nets to zero)
-        assertEquals(0, houseBalance.chipBalance.compareTo(BigDecimal.ZERO))
-        assertEquals(0, houseBalance.paymentBalance.compareTo(BigDecimal.ZERO))
-        assertEquals(0, houseBalance.outstanding.compareTo(BigDecimal.ZERO))
+        // In a balanced game (no payments yet):
+        // - Amount to receive: $50 (Bob owes)
+        // - Amount to pay: $50 (house owes Alice)
+        // - Net outstanding: $0 (balanced, no discrepancy)
+        assertEquals(0, houseBalance.chipBalance.compareTo(BigDecimal("50.00"))) // Amount to receive
+        assertEquals(0, houseBalance.paymentBalance.compareTo(BigDecimal("50.00"))) // Amount to pay
+        assertEquals(0, houseBalance.outstanding.compareTo(BigDecimal.ZERO)) // Net outstanding
     }
 
     @Test
@@ -554,27 +557,31 @@ class GameServiceTest {
         gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
         gameService.addPlayer(GAME_ID, ACCOUNT_ID2)
 
-        // Alice: buy-in $100, cash-out $150 → chip balance +$50 (owed by house)
+        // Alice: buy-in $100, cash-out $150 → chip balance +$50 (house owes Alice $50)
         gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
         gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(150))
-        // Alice receives $30 from house
+        // Alice receives $30 from house → outstanding now +$20
         gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(30), Payment.Side.RECIPIENT)
 
-        // Bob: buy-in $100, cash-out $50 → chip balance -$50 (owes house)
+        // Bob: buy-in $100, cash-out $50 → chip balance -$50 (Bob owes house $50)
         gameService.addBuyIn(GAME_ID, ACCOUNT_ID2, BigDecimal(100))
         gameService.updateCashOut(GAME_ID, ACCOUNT_ID2, BigDecimal(50))
-        // Bob pays $50 to house
+        // Bob pays $50 to house → outstanding now $0
         gameService.addPayment(GAME_ID, ACCOUNT_ID2, BigDecimal(50), Payment.Side.PAYER)
 
         val game = gameService.getGame(GAME_ID)
         val houseBalance = game.getHouseBalance()
 
-        // House chip balance: -(Alice +$50 + Bob -$50) = $0
-        assertEquals(0, houseBalance.chipBalance.compareTo(BigDecimal.ZERO))
-        // House payment balance: -(Alice -$30 + Bob +$50) = -$20
-        assertEquals(0, houseBalance.paymentBalance.compareTo(BigDecimal("-20.00")))
-        // House outstanding: $0 + (-$20) = -$20 (house owes $20)
-        assertEquals(0, houseBalance.outstanding.compareTo(BigDecimal("-20.00")))
+        // After payments:
+        // - Alice outstanding: +$20 (house still owes Alice)
+        // - Bob outstanding: $0 (settled)
+        // House balance:
+        // - Amount to receive: $0 (no one owes house)
+        // - Amount to pay: $20 (house owes Alice)
+        // - Net outstanding: -$20 (house has net obligation)
+        assertEquals(0, houseBalance.chipBalance.compareTo(BigDecimal.ZERO)) // Amount to receive
+        assertEquals(0, houseBalance.paymentBalance.compareTo(BigDecimal("20.00"))) // Amount to pay
+        assertEquals(0, houseBalance.outstanding.compareTo(BigDecimal("-20.00"))) // Net outstanding
     }
 
     @Test
@@ -582,28 +589,26 @@ class GameServiceTest {
         gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
         gameService.addPlayer(GAME_ID, ACCOUNT_ID2)
 
-        // Alice: big winner
+        // Alice: big winner (chip balance +$200, received $150, outstanding +$50)
         gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
         gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(300))
         gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(150), Payment.Side.RECIPIENT)
 
-        // Bob: big loser
+        // Bob: big loser (chip balance -$200, paid $100, outstanding -$100)
         gameService.addBuyIn(GAME_ID, ACCOUNT_ID2, BigDecimal(200))
         gameService.updateCashOut(GAME_ID, ACCOUNT_ID2, BigDecimal.ZERO)
         gameService.addPayment(GAME_ID, ACCOUNT_ID2, BigDecimal(100), Payment.Side.PAYER)
 
         val game = gameService.getGame(GAME_ID)
-        val playerBalances = game.getBalances()
         val houseBalance = game.getHouseBalance()
 
-        // Verify house balance is exact negative of sum of player balances
-        val totalPlayerChipBalance = playerBalances.sumOf { it.chipBalance }
-        val totalPlayerPaymentBalance = playerBalances.sumOf { it.paymentBalance }
-        val totalPlayerOutstanding = playerBalances.sumOf { it.outstanding }
-
-        assertEquals(-totalPlayerChipBalance, houseBalance.chipBalance)
-        assertEquals(-totalPlayerPaymentBalance, houseBalance.paymentBalance)
-        assertEquals(-totalPlayerOutstanding, houseBalance.outstanding)
+        // House balance:
+        // - Amount to receive: $100 (Bob still owes)
+        // - Amount to pay: $50 (house still owes Alice)
+        // - Net outstanding: $100 - $50 = $50 (house has net receivable)
+        assertEquals(0, houseBalance.chipBalance.compareTo(BigDecimal("100.00"))) // Amount to receive
+        assertEquals(0, houseBalance.paymentBalance.compareTo(BigDecimal("50.00"))) // Amount to pay
+        assertEquals(0, houseBalance.outstanding.compareTo(BigDecimal("50.00"))) // Net outstanding
     }
 
     @Test

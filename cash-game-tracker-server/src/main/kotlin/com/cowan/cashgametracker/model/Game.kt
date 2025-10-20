@@ -69,18 +69,26 @@ class Game(val id: String, val createTime: Instant, val decimals: Int) {
     fun getHouseBalance(): Balance {
         val playerBalances = getBalances()
 
-        // House balance is the negation of all player balances
-        val chipBalance = -playerBalances.sumOf { it.chipBalance }
-        val paymentBalance = -playerBalances.sumOf { it.paymentBalance }
-        val outstanding = -playerBalances.sumOf { it.outstanding }
+        // Amount to receive: what players owe to the house (absolute value of negative outstanding)
+        val amountToReceive = playerBalances
+            .filter { it.outstanding < BigDecimal.ZERO }
+            .sumOf { it.outstanding.abs() }
+
+        // Amount to pay: what house owes to players (positive outstanding)
+        val amountToPay = playerBalances
+            .filter { it.outstanding > BigDecimal.ZERO }
+            .sumOf { it.outstanding }
+
+        // Net outstanding: amount to receive - amount to pay (should be 0 in balanced game)
+        val netOutstanding = amountToReceive - amountToPay
 
         return Balance(
             accountId = "HOUSE",
             name = "THE HOUSE",
-            chipBalance = chipBalance,
-            paymentBalance = paymentBalance,
-            outstanding = outstanding,
-            status = SettlementStatus.SETTLED // House doesn't have a settlement status
+            chipBalance = amountToReceive,
+            paymentBalance = amountToPay,
+            outstanding = netOutstanding,
+            status = SettlementStatus.SETTLED
         )
     }
 

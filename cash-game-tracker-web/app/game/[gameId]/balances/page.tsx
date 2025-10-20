@@ -115,26 +115,24 @@ export default async function BalancesPage(props: { params: { gameId: string } }
 
               <div className="ml-14 space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">
-                    Chip Balance: <span className="text-gray-500">{getChipBalanceLabel(Number(house.chipBalance))}</span>
-                  </span>
-                  <span className={`font-medium ${Number(house.chipBalance) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className="text-gray-600">Amount to Receive:</span>
+                  <span className={`font-medium ${Number(house.chipBalance) > 0 ? 'text-green-600' : 'text-gray-900'}`}>
                     ${Number(house.chipBalance).toFixed(2)}
                   </span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{getPaymentBalanceLabel(Number(house.chipBalance))}</span>
-                  <span className={`font-medium ${Number(house.paymentBalance) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {Number(house.paymentBalance) >= 0 ? '+' : ''}${Number(house.paymentBalance).toFixed(2)}
+                  <span className="text-gray-600">Amount to Pay:</span>
+                  <span className={`font-medium ${Number(house.paymentBalance) > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                    ${Number(house.paymentBalance).toFixed(2)}
                   </span>
                 </div>
 
                 <div className="border-t border-gray-200 pt-1 mt-2"></div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-700 font-medium">Outstanding:</span>
-                  <span className={`font-semibold ${Number(house.outstanding) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className="text-gray-700 font-medium">Net Outstanding:</span>
+                  <span className={`font-semibold ${Number(house.outstanding) > 0 ? 'text-green-600' : Number(house.outstanding) < 0 ? 'text-red-600' : 'text-gray-900'}`}>
                     ${Number(house.outstanding).toFixed(2)}
                   </span>
                 </div>
