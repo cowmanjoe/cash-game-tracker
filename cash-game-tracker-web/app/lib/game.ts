@@ -42,6 +42,7 @@ export interface Payment {
 
 export interface Balances {
   balances: Balance[];
+  house: Balance;
 }
 
 export interface Balance {

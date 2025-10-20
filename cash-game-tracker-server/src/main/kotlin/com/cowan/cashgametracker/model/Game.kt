@@ -66,6 +66,24 @@ class Game(val id: String, val createTime: Instant, val decimals: Int) {
         }
     }
 
+    fun getHouseBalance(): Balance {
+        val playerBalances = getBalances()
+
+        // House balance is the negation of all player balances
+        val chipBalance = -playerBalances.sumOf { it.chipBalance }
+        val paymentBalance = -playerBalances.sumOf { it.paymentBalance }
+        val outstanding = -playerBalances.sumOf { it.outstanding }
+
+        return Balance(
+            accountId = "HOUSE",
+            name = "THE HOUSE",
+            chipBalance = chipBalance,
+            paymentBalance = paymentBalance,
+            outstanding = outstanding,
+            status = SettlementStatus.SETTLED // House doesn't have a settlement status
+        )
+    }
+
     private fun determineSettlementStatus(
         chipBalance: BigDecimal,
         outstanding: BigDecimal

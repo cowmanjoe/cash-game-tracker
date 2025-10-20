@@ -11,6 +11,7 @@ export default async function BalancesPage(props: { params: { gameId: string } }
   }
 
   const balances = balancesResponse.data.balances;
+  const house = balancesResponse.data.house;
 
   const getStatusBadge = (status: SettlementStatus) => {
     switch (status) {
@@ -96,6 +97,49 @@ export default async function BalancesPage(props: { params: { gameId: string } }
                 </li>
               );
             })}
+
+            {/* House Balance */}
+            <li className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-t-2 border-blue-200">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+                      <span className="text-xl">🏠</span>
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-sm font-bold text-blue-900">{house.name}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="ml-14 space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">
+                    Chip Balance: <span className="text-gray-500">{getChipBalanceLabel(Number(house.chipBalance))}</span>
+                  </span>
+                  <span className={`font-medium ${Number(house.chipBalance) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    ${Number(house.chipBalance).toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{getPaymentBalanceLabel(Number(house.chipBalance))}</span>
+                  <span className={`font-medium ${Number(house.paymentBalance) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {Number(house.paymentBalance) >= 0 ? '+' : ''}${Number(house.paymentBalance).toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="border-t border-gray-200 pt-1 mt-2"></div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 font-medium">Outstanding:</span>
+                  <span className={`font-semibold ${Number(house.outstanding) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    ${Number(house.outstanding).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </li>
           </ul>
         </div>
       </div>

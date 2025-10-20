@@ -152,7 +152,13 @@ class GameController(
 
     @GetMapping("{id}/balances")
     fun getBalances(@PathVariable("id") gameId: String): ServerResponse<BalancesResponse> {
-        return SuccessServerResponse(BalancesResponse.fromBalances(gameService.getBalances(gameId)))
+        val game = gameService.getGame(gameId)
+        return SuccessServerResponse(
+            BalancesResponse.fromBalances(
+                game.getBalances(),
+                game.getHouseBalance()
+            )
+        )
     }
 
     @GetMapping("{id}/transfers")
@@ -233,7 +239,7 @@ data class PaymentResponse(
     }
 }
 
-data class BalancesResponse(val balances: List<Item>) {
+data class BalancesResponse(val balances: List<Item>, val house: Item) {
     data class Item(
         val accountId: String,
         val name: String,
@@ -244,17 +250,27 @@ data class BalancesResponse(val balances: List<Item>) {
     )
 
     companion object {
-        fun fromBalances(balances: List<Balance>): BalancesResponse {
-            return BalancesResponse(balances.map {
-                Item(
-                    it.accountId,
-                    it.name,
-                    it.chipBalance.toPlainString(),
-                    it.paymentBalance.toPlainString(),
-                    it.outstanding.toPlainString(),
-                    it.status.toString()
+        fun fromBalances(balances: List<Balance>, houseBalance: Balance): BalancesResponse {
+            return BalancesResponse(
+                balances = balances.map {
+                    Item(
+                        it.accountId,
+                        it.name,
+                        it.chipBalance.toPlainString(),
+                        it.paymentBalance.toPlainString(),
+                        it.outstanding.toPlainString(),
+                        it.status.toString()
+                    )
+                },
+                house = Item(
+                    houseBalance.accountId,
+                    houseBalance.name,
+                    houseBalance.chipBalance.toPlainString(),
+                    houseBalance.paymentBalance.toPlainString(),
+                    houseBalance.outstanding.toPlainString(),
+                    houseBalance.status.toString()
                 )
-            })
+            )
         }
     }
 }

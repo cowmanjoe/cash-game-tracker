@@ -1,24 +1,29 @@
 'use client'
 
-import { Game, PaymentSide } from "@/app/lib/game"
+import { Game, PaymentSide, Balance } from "@/app/lib/game"
 import Link from "next/link"
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { addPaymentAction } from "./actions";
 
 export default function AddPaymentForm({
   game,
   activeAccountId,
-  currentBalance
+  balances
 }: {
   game: Game,
   activeAccountId: string,
-  currentBalance: number
+  balances: Balance[]
 }) {
   const [state, formAction, isPending] = useActionState(addPaymentAction, { game });
+  const [selectedAccountId, setSelectedAccountId] = useState(activeAccountId);
 
-  // Smart defaults based on current balance
-  const defaultSide = currentBalance < 0 ? PaymentSide.PAYER : currentBalance > 0 ? PaymentSide.RECIPIENT : PaymentSide.PAYER;
-  const defaultAmount = currentBalance !== 0 ? Math.abs(currentBalance).toFixed(2) : '';
+  // Find the selected player's balance
+  const selectedBalance = balances.find(b => b.accountId === selectedAccountId);
+  const outstanding = selectedBalance ? parseFloat(selectedBalance.outstanding) : 0;
+
+  // Smart defaults based on outstanding balance
+  const defaultSide = outstanding < 0 ? PaymentSide.PAYER : outstanding > 0 ? PaymentSide.RECIPIENT : PaymentSide.PAYER;
+  const defaultAmount = outstanding !== 0 ? Math.abs(outstanding).toFixed(2) : '';
 
   return (
     <main className="flex justify-center min-h-screen">
@@ -39,7 +44,8 @@ export default function AddPaymentForm({
                   className="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   id="accountId"
                   name="accountId"
-                  defaultValue={activeAccountId}
+                  value={selectedAccountId}
+                  onChange={(e) => setSelectedAccountId(e.target.value)}
                   disabled={isPending}
                   required
                 >
@@ -59,14 +65,15 @@ export default function AddPaymentForm({
                       type="radio"
                       name="side"
                       value={PaymentSide.PAYER}
+                      key={`payer-${selectedAccountId}`}
                       defaultChecked={defaultSide === PaymentSide.PAYER}
                       disabled={isPending}
                       className="mt-1"
                       required
                     />
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900">I paid the house</span>
-                      <span className="text-xs text-gray-600">Reduces your debt (if negative balance)</span>
+                      <span className="text-sm font-medium text-gray-900">Player paid the house</span>
+                      <span className="text-xs text-gray-600">Reduces debt (if negative balance)</span>
                     </div>
                   </label>
                   <label className="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors">
@@ -74,14 +81,15 @@ export default function AddPaymentForm({
                       type="radio"
                       name="side"
                       value={PaymentSide.RECIPIENT}
+                      key={`recipient-${selectedAccountId}`}
                       defaultChecked={defaultSide === PaymentSide.RECIPIENT}
                       disabled={isPending}
                       className="mt-1"
                       required
                     />
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900">I received from the house</span>
-                      <span className="text-xs text-gray-600">Settles what the house owes you (if positive balance)</span>
+                      <span className="text-sm font-medium text-gray-900">Player received from the house</span>
+                      <span className="text-xs text-gray-600">Settles what the house owes (if positive balance)</span>
                     </div>
                   </label>
                 </div>
@@ -90,9 +98,9 @@ export default function AddPaymentForm({
               <div className="flex flex-col gap-2">
                 <label htmlFor="amount" className="text-sm font-medium text-gray-700">
                   Amount ($)
-                  {currentBalance !== 0 && (
+                  {outstanding !== 0 && (
                     <span className="ml-2 text-xs text-gray-500">
-                      (Current balance: ${Math.abs(currentBalance).toFixed(2)} {currentBalance < 0 ? 'owed' : 'to receive'})
+                      (Outstanding: ${Math.abs(outstanding).toFixed(2)} {outstanding < 0 ? 'owed' : 'to receive'})
                     </span>
                   )}
                 </label>
@@ -105,6 +113,7 @@ export default function AddPaymentForm({
                   min="0.01"
                   max="100000"
                   placeholder="0.00"
+                  key={`amount-${selectedAccountId}`}
                   defaultValue={defaultAmount}
                   disabled={isPending}
                   required

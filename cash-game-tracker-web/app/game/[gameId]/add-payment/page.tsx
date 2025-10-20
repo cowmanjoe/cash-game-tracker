@@ -26,15 +26,11 @@ export default async function AddPaymentPage(props: { params: { gameId: string }
     redirect(`/join-game/${props.params.gameId}`);
   }
 
-  // Find current user's balance
-  const userBalance = balances.balances.find(b => b.accountId === sessionPayload.accountId);
-  const balanceValue = userBalance ? parseFloat(userBalance.chipBalance) : 0;
-
   return (
     <AddPaymentForm
       game={game}
       activeAccountId={sessionPayload.accountId}
-      currentBalance={balanceValue}
+      balances={balances.balances}
     />
   )
 }

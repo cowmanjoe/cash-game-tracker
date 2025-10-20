@@ -516,6 +516,97 @@ class GameServiceTest {
     }
 
     @Test
+    fun test_getHouseBalance_noPlayers_returnsZeroBalance() {
+        val game = gameService.getGame(GAME_ID)
+        val houseBalance = game.getHouseBalance()
+
+        assertEquals(0, houseBalance.chipBalance.compareTo(BigDecimal.ZERO))
+        assertEquals(0, houseBalance.paymentBalance.compareTo(BigDecimal.ZERO))
+        assertEquals(0, houseBalance.outstanding.compareTo(BigDecimal.ZERO))
+        assertEquals("HOUSE", houseBalance.accountId)
+        assertEquals("THE HOUSE", houseBalance.name)
+    }
+
+    @Test
+    fun test_getHouseBalance_winnersAndLosers_mirrorsPlayerBalances() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID2)
+
+        // Alice: buy-in $100, cash-out $150 → chip balance +$50 (winner)
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(150))
+
+        // Bob: buy-in $100, cash-out $50 → chip balance -$50 (loser)
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID2, BigDecimal(100))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID2, BigDecimal(50))
+
+        val game = gameService.getGame(GAME_ID)
+        val houseBalance = game.getHouseBalance()
+
+        // House should have zero chip balance (winner +$50, loser -$50 nets to zero)
+        assertEquals(0, houseBalance.chipBalance.compareTo(BigDecimal.ZERO))
+        assertEquals(0, houseBalance.paymentBalance.compareTo(BigDecimal.ZERO))
+        assertEquals(0, houseBalance.outstanding.compareTo(BigDecimal.ZERO))
+    }
+
+    @Test
+    fun test_getHouseBalance_withPayments_reflectsPaymentBalance() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID2)
+
+        // Alice: buy-in $100, cash-out $150 → chip balance +$50 (owed by house)
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(150))
+        // Alice receives $30 from house
+        gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(30), Payment.Side.RECIPIENT)
+
+        // Bob: buy-in $100, cash-out $50 → chip balance -$50 (owes house)
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID2, BigDecimal(100))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID2, BigDecimal(50))
+        // Bob pays $50 to house
+        gameService.addPayment(GAME_ID, ACCOUNT_ID2, BigDecimal(50), Payment.Side.PAYER)
+
+        val game = gameService.getGame(GAME_ID)
+        val houseBalance = game.getHouseBalance()
+
+        // House chip balance: -(Alice +$50 + Bob -$50) = $0
+        assertEquals(0, houseBalance.chipBalance.compareTo(BigDecimal.ZERO))
+        // House payment balance: -(Alice -$30 + Bob +$50) = -$20
+        assertEquals(0, houseBalance.paymentBalance.compareTo(BigDecimal("-20.00")))
+        // House outstanding: $0 + (-$20) = -$20 (house owes $20)
+        assertEquals(0, houseBalance.outstanding.compareTo(BigDecimal("-20.00")))
+    }
+
+    @Test
+    fun test_getHouseBalance_multiplePlayersComplex_sumsCorrectly() {
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID1)
+        gameService.addPlayer(GAME_ID, ACCOUNT_ID2)
+
+        // Alice: big winner
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID1, BigDecimal(100))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID1, BigDecimal(300))
+        gameService.addPayment(GAME_ID, ACCOUNT_ID1, BigDecimal(150), Payment.Side.RECIPIENT)
+
+        // Bob: big loser
+        gameService.addBuyIn(GAME_ID, ACCOUNT_ID2, BigDecimal(200))
+        gameService.updateCashOut(GAME_ID, ACCOUNT_ID2, BigDecimal.ZERO)
+        gameService.addPayment(GAME_ID, ACCOUNT_ID2, BigDecimal(100), Payment.Side.PAYER)
+
+        val game = gameService.getGame(GAME_ID)
+        val playerBalances = game.getBalances()
+        val houseBalance = game.getHouseBalance()
+
+        // Verify house balance is exact negative of sum of player balances
+        val totalPlayerChipBalance = playerBalances.sumOf { it.chipBalance }
+        val totalPlayerPaymentBalance = playerBalances.sumOf { it.paymentBalance }
+        val totalPlayerOutstanding = playerBalances.sumOf { it.outstanding }
+
+        assertEquals(-totalPlayerChipBalance, houseBalance.chipBalance)
+        assertEquals(-totalPlayerPaymentBalance, houseBalance.paymentBalance)
+        assertEquals(-totalPlayerOutstanding, houseBalance.outstanding)
+    }
+
+    @Test
     fun test_getTransfers_withNoTransfers_returnsEmptyList() {
         val transfers = gameService.getTransfers(GAME_ID)
 
