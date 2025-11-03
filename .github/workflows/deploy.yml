@@ -12,3 +12,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x cash-game-tracker-server/gradlew
+
+      - name: Run server tests
+        run: |
+          cd cash-game-tracker-server
+          ./gradlew test --no-daemon
