@@ -27,3 +27,20 @@ jobs:
         run: |
           cd cash-game-tracker-server
           ./gradlew test --no-daemon
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cash-game-tracker-web/package-lock.json
+
+      - name: Install web dependencies
+        run: |
+          cd cash-game-tracker-web
+          npm ci
+
+      - name: Build web application
+        run: |
+          cd cash-game-tracker-web
+          npm run build
