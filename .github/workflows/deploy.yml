@@ -63,3 +63,37 @@ jobs:
           cd cash-game-tracker-web
           docker build -t ghcr.io/cowmanjoe/cash-game-tracker-web:latest .
           docker push ghcr.io/cowmanjoe/cash-game-tracker-web:latest
+
+      - name: Deploy to GCP VM
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+          SPRING_PROFILES_ACTIVE: ${{ secrets.SPRING_PROFILES_ACTIVE }}
+          BACKEND_API_URL: ${{ secrets.BACKEND_API_URL }}
+          SECURE_COOKIES: ${{ secrets.SECURE_COOKIES }}
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: SPRING_PROFILES_ACTIVE,BACKEND_API_URL,SECURE_COOKIES
+          script: |
+            # Navigate to deployment directory
+            cd ~/cash-game-tracker
+
+            # Write environment variables to .env file
+            cat > .env << EOF
+            SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+            BACKEND_API_URL=${BACKEND_API_URL}
+            SECURE_COOKIES=${SECURE_COOKIES}
+            EOF
+
+            # Login to GitHub Container Registry
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull latest images
+            docker-compose -f docker-compose.prod.yml pull
+
+            # Restart containers with new images
+            docker-compose -f docker-compose.prod.yml up -d
+
+            # Cleanup old images
+            docker image prune -f
