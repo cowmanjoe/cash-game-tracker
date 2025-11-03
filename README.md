@@ -128,6 +128,27 @@ npm run build
 npm start
 ```
 
+## Deployment
+
+This project uses GitHub Actions for automated deployment to GCP VM.
+
+- **Trigger:** Push to `main` branch
+- **Process:** Tests → Build Docker images → Deploy to GCP VM
+- **Setup Guide:** See [docs/deployment/github-actions-setup.md](docs/deployment/github-actions-setup.md)
+
+### Manual Deployment
+
+For local testing or manual deployment:
+
+```bash
+# Build images locally
+docker-compose build
+
+# Deploy to production (on VM)
+docker-compose -f docker-compose.prod.yml pull
+docker-compose -f docker-compose.prod.yml up -d
+```
+
 ## Features
 
 - **Game Management**: Create and join cash games with unique IDs
