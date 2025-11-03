@@ -1,0 +1,96 @@
+name: Deploy to GCP VM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x cash-game-tracker-server/gradlew
+
+      - name: Run server tests
+        run: |
+          cd cash-game-tracker-server
+          ./gradlew test --no-daemon
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cash-game-tracker-web/package-lock.json
+
+      - name: Install web dependencies
+        run: |
+          cd cash-game-tracker-web
+          npm ci
+
+      - name: Build web application
+        run: |
+          cd cash-game-tracker-web
+          npm run build
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push server image
+        run: |
+          cd cash-game-tracker-server
+          docker build -t ghcr.io/cowmanjoe/cash-game-tracker-server:latest .
+          docker push ghcr.io/cowmanjoe/cash-game-tracker-server:latest
+
+      - name: Build and push web image
+        run: |
+          cd cash-game-tracker-web
+          docker build -t ghcr.io/cowmanjoe/cash-game-tracker-web:latest .
+          docker push ghcr.io/cowmanjoe/cash-game-tracker-web:latest
+
+      - name: Deploy to GCP VM
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+          SPRING_PROFILES_ACTIVE: ${{ secrets.SPRING_PROFILES_ACTIVE }}
+          BACKEND_API_URL: ${{ secrets.BACKEND_API_URL }}
+          SECURE_COOKIES: ${{ secrets.SECURE_COOKIES }}
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: SPRING_PROFILES_ACTIVE,BACKEND_API_URL,SECURE_COOKIES
+          script: |
+            # Navigate to deployment directory
+            cd ~/cash-game-tracker
+
+            # Write environment variables to .env file
+            cat > .env << EOF
+            SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+            BACKEND_API_URL=${BACKEND_API_URL}
+            SECURE_COOKIES=${SECURE_COOKIES}
+            EOF
+
+            # Login to GitHub Container Registry
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin && \
+            # Pull latest images
+            docker-compose -f docker-compose.prod.yml pull && \
+            # Restart containers with new images
+            docker-compose -f docker-compose.prod.yml up -d && \
+            # Cleanup old images
+            docker image prune -f

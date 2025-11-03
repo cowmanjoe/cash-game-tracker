@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # Backend API server
+  server:
+    image: ghcr.io/cowmanjoe/cash-game-tracker-server:latest
+    container_name: cash-game-tracker-server
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - cash-game-tracker-network
+
+  # Frontend web application
+  web:
+    image: ghcr.io/cowmanjoe/cash-game-tracker-web:latest
+    container_name: cash-game-tracker-web
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - server
+    restart: unless-stopped
+    networks:
+      - cash-game-tracker-network
+
+networks:
+  cash-game-tracker-network:
+    driver: bridge
