@@ -4,6 +4,7 @@ import com.cowan.cashgametracker.model.Balance
 import com.cowan.cashgametracker.model.BuyIn
 import com.cowan.cashgametracker.model.CashOut
 import com.cowan.cashgametracker.model.Game
+import com.cowan.cashgametracker.model.GameSummary
 import com.cowan.cashgametracker.model.Payment
 import com.cowan.cashgametracker.model.Transfer
 import com.cowan.cashgametracker.service.GameService
@@ -156,7 +157,7 @@ class GameController(
         return SuccessServerResponse(
             BalancesResponse.fromBalances(
                 game.getBalances(),
-                game.getHouseBalance()
+                game.getGameSummary()
             )
         )
     }
@@ -239,8 +240,8 @@ data class PaymentResponse(
     }
 }
 
-data class BalancesResponse(val balances: List<Item>, val house: Item) {
-    data class Item(
+data class BalancesResponse(val balances: List<BalanceItem>, val summary: SummaryItem) {
+    data class BalanceItem(
         val accountId: String,
         val name: String,
         val chipBalance: String,
@@ -249,11 +250,20 @@ data class BalancesResponse(val balances: List<Item>, val house: Item) {
         val status: String
     )
 
+    data class SummaryItem(
+        val amountToReceive: String,
+        val amountToPay: String,
+        val netOutstanding: String,
+        val totalChipsInPlay: String,
+        val totalCashOuts: String,
+        val netChips: String
+    )
+
     companion object {
-        fun fromBalances(balances: List<Balance>, houseBalance: Balance): BalancesResponse {
+        fun fromBalances(balances: List<Balance>, gameSummary: GameSummary): BalancesResponse {
             return BalancesResponse(
                 balances = balances.map {
-                    Item(
+                    BalanceItem(
                         it.accountId,
                         it.name,
                         it.chipBalance.toPlainString(),
@@ -262,13 +272,13 @@ data class BalancesResponse(val balances: List<Item>, val house: Item) {
                         it.status.toString()
                     )
                 },
-                house = Item(
-                    houseBalance.accountId,
-                    houseBalance.name,
-                    houseBalance.chipBalance.toPlainString(),
-                    houseBalance.paymentBalance.toPlainString(),
-                    houseBalance.outstanding.toPlainString(),
-                    houseBalance.status.toString()
+                summary = SummaryItem(
+                    gameSummary.amountToReceive.toPlainString(),
+                    gameSummary.amountToPay.toPlainString(),
+                    gameSummary.netOutstanding.toPlainString(),
+                    gameSummary.totalChipsInPlay.toPlainString(),
+                    gameSummary.totalCashOuts.toPlainString(),
+                    gameSummary.netChips.toPlainString()
                 )
             )
         }

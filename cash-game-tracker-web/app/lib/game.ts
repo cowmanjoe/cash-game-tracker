@@ -42,7 +42,7 @@ export interface Payment {
 
 export interface Balances {
   balances: Balance[];
-  house: Balance;
+  summary: GameSummary;
 }
 
 export interface Balance {
@@ -52,6 +52,15 @@ export interface Balance {
   paymentBalance: string;
   outstanding: string;
   status: SettlementStatus;
+}
+
+export interface GameSummary {
+  amountToReceive: string;
+  amountToPay: string;
+  netOutstanding: string;
+  totalChipsInPlay: string;
+  totalCashOuts: string;
+  netChips: string;
 }
 
 export interface Transfers {

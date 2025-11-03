@@ -11,7 +11,7 @@ export default async function BalancesPage(props: { params: { gameId: string } }
   }
 
   const balances = balancesResponse.data.balances;
-  const house = balancesResponse.data.house;
+  const summary = balancesResponse.data.summary;
 
   const getStatusBadge = (status: SettlementStatus) => {
     switch (status) {
@@ -98,43 +98,72 @@ export default async function BalancesPage(props: { params: { gameId: string } }
               );
             })}
 
-            {/* House Balance */}
+            {/* Game Summary */}
             <li className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-t-2 border-blue-200">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
                     <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-                      <span className="text-xl">🏠</span>
+                      <span className="text-xl">📊</span>
                     </div>
                   </div>
                   <div className="ml-4">
-                    <div className="text-sm font-bold text-blue-900">{house.name}</div>
+                    <div className="text-sm font-bold text-blue-900">GAME SUMMARY</div>
                   </div>
                 </div>
               </div>
 
-              <div className="ml-14 space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Amount to Receive:</span>
-                  <span className={`font-medium ${Number(house.chipBalance) > 0 ? 'text-green-600' : 'text-gray-900'}`}>
-                    ${Number(house.chipBalance).toFixed(2)}
-                  </span>
+              <div className="ml-14 grid grid-cols-2 gap-6">
+                {/* Left Column: Settlement/Payment Info */}
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Amount to Receive:</span>
+                    <span className={`font-medium ${Number(summary.amountToReceive) > 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                      ${Number(summary.amountToReceive).toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Amount to Pay:</span>
+                    <span className={`font-medium ${Number(summary.amountToPay) > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                      ${Number(summary.amountToPay).toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-1 mt-2"></div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700 font-medium">Net Outstanding:</span>
+                    <span className={`font-semibold ${Number(summary.netOutstanding) > 0 ? 'text-green-600' : Number(summary.netOutstanding) < 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                      ${Number(summary.netOutstanding).toFixed(2)}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Amount to Pay:</span>
-                  <span className={`font-medium ${Number(house.paymentBalance) > 0 ? 'text-red-600' : 'text-gray-900'}`}>
-                    ${Number(house.paymentBalance).toFixed(2)}
-                  </span>
-                </div>
+                {/* Right Column: Chip Tracking Info */}
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Buy-Ins:</span>
+                    <span className="font-medium text-gray-900">
+                      ${Number(summary.totalChipsInPlay).toFixed(2)}
+                    </span>
+                  </div>
 
-                <div className="border-t border-gray-200 pt-1 mt-2"></div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Cash-Outs:</span>
+                    <span className="font-medium text-gray-900">
+                      ${Number(summary.totalCashOuts).toFixed(2)}
+                    </span>
+                  </div>
 
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700 font-medium">Net Outstanding:</span>
-                  <span className={`font-semibold ${Number(house.outstanding) > 0 ? 'text-green-600' : Number(house.outstanding) < 0 ? 'text-red-600' : 'text-gray-900'}`}>
-                    ${Number(house.outstanding).toFixed(2)}
-                  </span>
+                  <div className="border-t border-gray-200 pt-1 mt-2"></div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700 font-medium">Net Chips:</span>
+                    <span className={`font-semibold ${Number(summary.netChips) === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      ${Number(summary.netChips).toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </li>

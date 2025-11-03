@@ -66,7 +66,7 @@ class Game(val id: String, val createTime: Instant, val decimals: Int) {
         }
     }
 
-    fun getHouseBalance(): Balance {
+    fun getGameSummary(): GameSummary {
         val playerBalances = getBalances()
 
         // Amount to receive: what players owe to the house (absolute value of negative outstanding)
@@ -82,13 +82,21 @@ class Game(val id: String, val createTime: Instant, val decimals: Int) {
         // Net outstanding: amount to receive - amount to pay (should be 0 in balanced game)
         val netOutstanding = amountToReceive - amountToPay
 
-        return Balance(
-            accountId = "HOUSE",
-            name = "THE HOUSE",
-            chipBalance = amountToReceive,
-            paymentBalance = amountToPay,
-            outstanding = netOutstanding,
-            status = SettlementStatus.SETTLED
+        // Calculate net chips: total buy-ins - total cash-outs (should be 0 if complete)
+        val totalBuyIns = buyIns.sumOf { it.amount }
+        val totalCashOuts = cashOutsByAccountId.values.sumOf { it.amount }
+        val netChips = totalBuyIns - totalCashOuts
+
+        // Total chips in play: total buy-ins
+        val totalChipsInPlay = totalBuyIns
+
+        return GameSummary(
+            amountToReceive = amountToReceive,
+            amountToPay = amountToPay,
+            netOutstanding = netOutstanding,
+            totalChipsInPlay = totalChipsInPlay,
+            totalCashOuts = totalCashOuts,
+            netChips = netChips
         )
     }
 
