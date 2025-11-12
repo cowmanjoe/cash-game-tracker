@@ -11,6 +11,11 @@ export enum SettlementStatus {
   OVERPAID = "OVERPAID"
 }
 
+export enum GameStatus {
+  ACTIVE = "ACTIVE",
+  CLOSED = "CLOSED"
+}
+
 export interface Game {
   id: string;
   createTime: number;
@@ -18,6 +23,8 @@ export interface Game {
   cashOuts: Record<string, CashOut>;
   payments: Payment[];
   players: Record<string, Account>;
+  roomCode: string | null;
+  status: GameStatus;
 }
 
 export interface BuyIn {
