@@ -10,6 +10,7 @@ import com.cowan.cashgametracker.model.Balance
 import com.cowan.cashgametracker.model.BuyIn
 import com.cowan.cashgametracker.model.CashOut
 import com.cowan.cashgametracker.model.Game
+import com.cowan.cashgametracker.model.GameStatus
 import com.cowan.cashgametracker.model.Payment
 import com.cowan.cashgametracker.model.Transfer
 import com.cowan.cashgametracker.model.ValidationException
@@ -39,12 +40,21 @@ class GameService(
     }
 
     @Transactional
-    fun createGame(): Game {
-        val gameEntity = GameEntity(Instant.now())
+    fun createGame(decimals: Int): Game {
+        val gameId = EntityUtil.generateNewId()
+        val roomCode = generateUniqueRoomCode()
 
-        gameRepo.save(gameEntity)
+        val gameEntity = GameEntity(
+            createTime = Instant.now(),
+            decimals = decimals,
+            roomCode = roomCode,
+            status = "ACTIVE",
+            id = gameId
+        )
 
-        return convertEntity(gameEntity)
+        val savedGameEntity = gameRepo.save(gameEntity)
+
+        return convertEntity(savedGameEntity)
     }
 
     @Transactional
@@ -178,7 +188,9 @@ class GameService(
         val game = Game(
             EntityUtil.requireNotNullId(gameEntity.id),
             gameEntity.createTime,
-            gameEntity.decimals
+            gameEntity.decimals,
+            gameEntity.roomCode,
+            GameStatus.valueOf(gameEntity.status)
         )
 
         gameEntity.players.map { accountService.getAccount(it.accountId) }.forEach { game.addPlayer(it) }
@@ -203,6 +215,19 @@ class GameService(
             currencyAmountService.round(paymentEntity.amount),
             paymentEntity.createTime,
             paymentEntity.side
+        )
+    }
+
+    private fun generateUniqueRoomCode(): String {
+        repeat(MAX_CODE_GENERATION_RETRIES) {
+            val code = roomCodeGenerator.generateCode()
+            val existing = gameRepo.findByRoomCode(code)
+            if (existing == null) {
+                return code
+            }
+        }
+        throw RoomCodeGenerationException(
+            "Failed to generate unique room code after $MAX_CODE_GENERATION_RETRIES attempts"
         )
     }
 }

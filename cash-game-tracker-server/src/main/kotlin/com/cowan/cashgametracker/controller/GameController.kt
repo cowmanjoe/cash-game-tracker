@@ -32,7 +32,7 @@ class GameController(
 
     @PostMapping
     fun createGame(): ServerResponse<GameResponse> {
-        return SuccessServerResponse(GameResponse.fromGame(gameService.createGame()))
+        return SuccessServerResponse(GameResponse.fromGame(gameService.createGame(2)))
     }
 
     @PostMapping("{id}/buy-in")

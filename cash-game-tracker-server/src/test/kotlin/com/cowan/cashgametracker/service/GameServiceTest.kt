@@ -3,6 +3,7 @@ package com.cowan.cashgametracker.service
 import com.cowan.cashgametracker.entity.EntityUtil
 import com.cowan.cashgametracker.entity.GameEntity
 import com.cowan.cashgametracker.model.Account
+import com.cowan.cashgametracker.model.GameStatus
 import com.cowan.cashgametracker.model.Payment
 import com.cowan.cashgametracker.model.PlayerNotInGameException
 import com.cowan.cashgametracker.model.SettlementStatus
@@ -12,6 +13,7 @@ import com.cowan.cashgametracker.repository.GameRepository
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -30,11 +32,12 @@ class GameServiceTest {
 
     private val mockGameRepo = mockk<GameRepository>()
     private val mockAccountService = mockk<AccountService>()
+    private val mockRoomCodeGenerator = mockk<RoomCodeGenerator>()
     private val currencyAmountService = com.cowan.cashgametracker.util.CurrencyAmountService()
-    private val gameService = GameService(mockGameRepo, mockAccountService, currencyAmountService)
+    private val gameService = GameService(mockGameRepo, mockAccountService, currencyAmountService, mockRoomCodeGenerator)
 
     private val gameEntities = mutableMapOf<String, GameEntity>()
-    private val gameEntity = GameEntity(GAME_CREATE_TIME, id = GAME_ID)
+    private val gameEntity = GameEntity(GAME_CREATE_TIME, roomCode = "TEST", status = "ACTIVE", id = GAME_ID)
 
     private val accounts = mutableMapOf<String, Account>()
 
@@ -57,6 +60,8 @@ class GameServiceTest {
         gameEntities[gameEntity.id!!] = gameEntity
 
         every { mockAccountService.getAccount(any()) } answers { accounts.getValue(firstArg()) }
+        every { mockRoomCodeGenerator.generateCode() } returns "ABCD"
+        every { mockGameRepo.findByRoomCode(any()) } returns null
 
         accounts[ACCOUNT_ID1] = Account(ACCOUNT_ID1, ACCOUNT_NAME1)
         accounts[ACCOUNT_ID2] = Account(ACCOUNT_ID2, ACCOUNT_NAME2)
@@ -64,11 +69,27 @@ class GameServiceTest {
 
     @Test
     fun test_createGame_newGame_returnsEmptyGame() {
-        val game = gameService.createGame()
+        val game = gameService.createGame(2)
 
         assertEquals(0, game.buyIns.size)
         assertEquals(0, game.cashOutsByAccountId.size)
         assertEquals(0, game.payments.size)
+    }
+
+    @Test
+    fun test_createGame_assignsRoomCode() {
+        val game = gameService.createGame(2)
+
+        assertNotNull(game.roomCode)
+        assertEquals(4, game.roomCode!!.length)
+        assertTrue(game.roomCode!!.all { it.isUpperCase() && it.isLetter() })
+    }
+
+    @Test
+    fun test_createGame_setsStatusToActive() {
+        val game = gameService.createGame(2)
+
+        assertEquals(GameStatus.ACTIVE, game.status)
     }
 
     @Test
