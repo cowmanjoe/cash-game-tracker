@@ -175,6 +175,18 @@ class GameService(
         return convertEntity(gameEntity)
     }
 
+    @Transactional
+    fun closeGame(gameId: String) {
+        val gameEntity = gameRepo.getById(gameId)
+
+        val closedGame = gameEntity.copy(
+            status = "CLOSED",
+            roomCode = null
+        )
+
+        gameRepo.save(closedGame)
+    }
+
     private fun convertEntity(buyInEntity: BuyInEntity): BuyIn {
         return BuyIn(
             EntityUtil.requireNotNullId(buyInEntity.id),
