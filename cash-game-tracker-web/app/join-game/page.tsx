@@ -4,13 +4,18 @@ export default async function JoinGamePage() {
   async function submitJoinGameForm(formData: FormData) {
     'use server';
 
-    const gameId = formData.get('gameId');
+    const gameIdOrCode = formData.get('gameId');
 
-    if (!gameId) {
-      throw Error("Game ID was null");
+    if (!gameIdOrCode) {
+      throw Error("Game ID or room code was null");
     }
 
-    redirect(`/join-game/${gameId}`);
+    // Normalize: if it looks like a room code (4 letters), uppercase it
+    const normalized = gameIdOrCode.toString().length === 4 && /^[a-zA-Z]+$/.test(gameIdOrCode.toString())
+      ? gameIdOrCode.toString().toUpperCase()
+      : gameIdOrCode.toString();
+
+    redirect(`/join-game/${normalized}`);
   }
 
   return (
@@ -22,7 +27,7 @@ export default async function JoinGamePage() {
               className="rounded-lg px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               id="gameId"
               name="gameId"
-              placeholder="Game ID"
+              placeholder="Room Code or Game ID"
               required
             />
 
