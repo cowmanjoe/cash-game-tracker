@@ -3,6 +3,7 @@ import { getSession } from "@/app/lib/session";
 import Link from "next/link";
 import TransferTable from "../transfer-table";
 import { notFound, redirect } from "next/navigation";
+import RoomCodeDisplay from "./room-code-display";
 
 export default async function GamePage({ params }: { params: { gameId: string } }) {
   const gameResponse = await getGame(params.gameId)
@@ -32,6 +33,7 @@ export default async function GamePage({ params }: { params: { gameId: string } 
 
   return (
     <div className="container mx-auto p-4">
+      <RoomCodeDisplay roomCode={game.roomCode} />
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <TransferTable game={game} transfers={transactions}/>
       </div>
