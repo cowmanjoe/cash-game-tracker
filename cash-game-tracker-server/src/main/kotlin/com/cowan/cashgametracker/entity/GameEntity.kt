@@ -17,5 +17,7 @@ data class GameEntity(
     @MappedCollection(idColumn = "GAME_ID")
     val players: MutableSet<GamePlayerEntity> = mutableSetOf(),
     val decimals: Int = 2,
+    val roomCode: String?,
+    val status: String,
     @Id var id: String? = null
 )
