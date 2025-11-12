@@ -24,8 +24,13 @@ import java.time.Instant
 class GameService(
     private val gameRepo: GameRepository,
     private val accountService: AccountService,
-    private val currencyAmountService: CurrencyAmountService
+    private val currencyAmountService: CurrencyAmountService,
+    private val roomCodeGenerator: RoomCodeGenerator
 ) {
+
+    companion object {
+        private const val MAX_CODE_GENERATION_RETRIES = 10
+    }
 
     fun getGame(id: String): Game {
         val gameEntity = gameRepo.getById(id)
@@ -201,3 +206,5 @@ class GameService(
         )
     }
 }
+
+class RoomCodeGenerationException(message: String) : RuntimeException(message)
