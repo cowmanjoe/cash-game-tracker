@@ -47,15 +47,13 @@ class GameService(
 
     @Transactional
     fun createGame(decimals: Int): Game {
-        val gameId = EntityUtil.generateNewId()
         val roomCode = generateUniqueRoomCode()
 
         val gameEntity = GameEntity(
             createTime = Instant.now(),
             decimals = decimals,
             roomCode = roomCode,
-            status = "ACTIVE",
-            id = gameId
+            status = "ACTIVE"
         )
 
         val savedGameEntity = gameRepo.save(gameEntity)
