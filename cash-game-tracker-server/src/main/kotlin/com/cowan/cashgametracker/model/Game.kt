@@ -3,7 +3,13 @@ package com.cowan.cashgametracker.model
 import java.math.BigDecimal
 import java.time.Instant
 
-class Game(val id: String, val createTime: Instant, val decimals: Int) {
+class Game(
+    val id: String,
+    val createTime: Instant,
+    val decimals: Int,
+    val roomCode: String?,
+    val status: GameStatus
+) {
 
     private val mutableBuyIns = mutableListOf<BuyIn>()
     private val mutableCashOuts = mutableMapOf<String, CashOut>()
@@ -132,6 +138,10 @@ class Game(val id: String, val createTime: Instant, val decimals: Int) {
     }
 }
 
+enum class GameStatus {
+    ACTIVE,
+    CLOSED
+}
 
 class PlayerNotInGameException(accountId: String) :
     ValidationException("Player with accountId $accountId is not in the game")
