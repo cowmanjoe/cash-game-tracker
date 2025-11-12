@@ -14,19 +14,19 @@ export default async function JoinGamePage() {
   }
 
   return (
-    <main className="flex justify-center min-h-screen">
-      <div className="flex justify-center flex-col">
+    <main className="flex min-h-screen flex-col items-center justify-center px-4">
+      <div className="w-full max-w-md">
         <form action={submitJoinGameForm}>
-          <div className="flex gap-2 flex-col">
+          <div className="flex gap-4 flex-col">
             <input
-              className="rounded-lg"
+              className="rounded-lg px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               id="gameId"
               name="gameId"
               placeholder="Game ID"
               required
             />
 
-            <button type="submit" className="flex items-center gap-5 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base">
+            <button type="submit" className="flex items-center justify-center gap-3 rounded-lg bg-blue-500 px-6 py-4 text-base font-medium text-white transition-colors hover:bg-blue-400 md:text-lg">
               Join Game
             </button>
           </div>
