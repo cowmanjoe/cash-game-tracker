@@ -65,6 +65,11 @@ class GameServiceTest {
         every { mockAccountService.getAccount(any()) } answers { accounts.getValue(firstArg()) }
         every { mockRoomCodeGenerator.generateCode() } returns "ABCD"
         every { mockGameRepo.findByRoomCode(any()) } returns null
+        every { mockGameRepo.findByRoomCodeAndStatus(any(), any()) } answers {
+            val roomCode = firstArg<String>()
+            val status = secondArg<String>()
+            gameEntities.values.find { it.roomCode == roomCode && it.status == status }
+        }
 
         accounts[ACCOUNT_ID1] = Account(ACCOUNT_ID1, ACCOUNT_NAME1)
         accounts[ACCOUNT_ID2] = Account(ACCOUNT_ID2, ACCOUNT_NAME2)
@@ -748,6 +753,59 @@ class GameServiceTest {
         // (This test is probabilistic but with 20 tries and 456k combinations,
         // if reuse works it should occasionally match)
         assertTrue(newRoomCodes.isNotEmpty(), "Should create new games successfully")
+    }
+
+    @Test
+    fun test_getGame_byRoomCode_returnsGame() {
+        val createdGame = gameService.createGame(2)
+        val roomCode = createdGame.roomCode!!
+
+        val retrievedGame = gameService.getGame(roomCode)
+
+        assertEquals(createdGame.id, retrievedGame.id)
+        assertEquals(roomCode, retrievedGame.roomCode)
+    }
+
+    @Test
+    fun test_getGame_byUuid_returnsGame() {
+        val createdGame = gameService.createGame(2)
+
+        val retrievedGame = gameService.getGame(createdGame.id)
+
+        assertEquals(createdGame.id, retrievedGame.id)
+    }
+
+    @Test
+    fun test_getGame_byRoomCode_caseInsensitive() {
+        val createdGame = gameService.createGame(2)
+        val roomCode = createdGame.roomCode!!
+
+        val retrievedGame = gameService.getGame(roomCode.lowercase())
+
+        assertEquals(createdGame.id, retrievedGame.id)
+    }
+
+    @Test
+    fun test_getGame_byClosedGameRoomCode_throwsException() {
+        val game = gameService.createGame(2)
+        val roomCode = game.roomCode!!
+
+        gameService.closeGame(game.id)
+
+        assertThrows<GameNotFoundException> {
+            gameService.getGame(roomCode)
+        }
+    }
+
+    @Test
+    fun test_getGame_byClosedGameUuid_returnsGame() {
+        val game = gameService.createGame(2)
+
+        gameService.closeGame(game.id)
+
+        val retrievedGame = gameService.getGame(game.id)
+        assertEquals(game.id, retrievedGame.id)
+        assertEquals(GameStatus.CLOSED, retrievedGame.status)
     }
 
     private fun assertContainsTransfer(

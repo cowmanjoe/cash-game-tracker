@@ -33,9 +33,15 @@ class GameService(
         private const val MAX_CODE_GENERATION_RETRIES = 10
     }
 
-    fun getGame(id: String): Game {
-        val gameEntity = gameRepo.getById(id)
-
+    fun getGame(idOrCode: String): Game {
+        val gameEntity = if (isRoomCode(idOrCode)) {
+            // Lookup by room code - only ACTIVE games have codes
+            gameRepo.findByRoomCodeAndStatus(idOrCode.uppercase(), "ACTIVE")
+                ?: throw GameNotFoundException("Game not found with code: $idOrCode")
+        } else {
+            // Lookup by UUID - works for any status
+            gameRepo.getById(idOrCode)
+        }
         return convertEntity(gameEntity)
     }
 
@@ -242,6 +248,12 @@ class GameService(
             "Failed to generate unique room code after $MAX_CODE_GENERATION_RETRIES attempts"
         )
     }
+
+    private fun isRoomCode(input: String): Boolean {
+        return input.length == 4 && input.all { it.isLetter() }
+    }
 }
 
 class RoomCodeGenerationException(message: String) : RuntimeException(message)
+
+class GameNotFoundException(message: String) : RuntimeException(message)
