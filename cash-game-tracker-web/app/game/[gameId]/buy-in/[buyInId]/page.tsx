@@ -13,8 +13,9 @@ const DAYS = [
   'Sat'
 ]
 
-export default async function BuyInPage(props: { params: { gameId: string, buyInId: string } }) {
-  const gameResponse = await getGame(props.params.gameId)
+export default async function BuyInPage(props: { params: Promise<{ gameId: string, buyInId: string }> }) {
+  const params = await props.params;
+  const gameResponse = await getGame(params.gameId)
 
   if (gameResponse.isError) {
     console.error(`Received error: ${gameResponse.error.type}`)
@@ -23,10 +24,10 @@ export default async function BuyInPage(props: { params: { gameId: string, buyIn
 
   const game = gameResponse.data;
 
-  const buyIn = game.buyIns.find(b => b.id === props.params.buyInId);
+  const buyIn = game.buyIns.find(b => b.id === params.buyInId);
 
   if (!buyIn) {
-    console.error(`Buy in ${props.params.buyInId} not found`)
+    console.error(`Buy in ${params.buyInId} not found`)
     notFound();
   }
 

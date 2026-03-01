@@ -4,8 +4,9 @@ import { addPlayer, getGame } from "@/app/lib/game-client";
 import { createSession } from "@/app/lib/session";
 import { notFound, redirect } from "next/navigation";
 
-export default async function JoinGamePage(props: { params: { id: string } }) {
-  const gameResponse = await getGame(props.params.id)
+export default async function JoinGamePage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const gameResponse = await getGame(params.id)
 
   if (gameResponse.isError) {
     console.error(`Received error: ${gameResponse.error.type}`)

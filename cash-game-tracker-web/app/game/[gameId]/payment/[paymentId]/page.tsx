@@ -14,8 +14,9 @@ const DAYS = [
   'Sat'
 ]
 
-export default async function PaymentPage(props: { params: { gameId: string, paymentId: string } }) {
-  const gameResponse = await getGame(props.params.gameId)
+export default async function PaymentPage(props: { params: Promise<{ gameId: string, paymentId: string }> }) {
+  const params = await props.params;
+  const gameResponse = await getGame(params.gameId)
 
   if (gameResponse.isError) {
     console.error(`Received error: ${gameResponse.error.type}`)
@@ -24,10 +25,10 @@ export default async function PaymentPage(props: { params: { gameId: string, pay
 
   const game = gameResponse.data;
 
-  const payment = game.payments.find(p => p.id === props.params.paymentId);
+  const payment = game.payments.find(p => p.id === params.paymentId);
 
   if (!payment) {
-    console.error(`Payment ${props.params.paymentId} not found`)
+    console.error(`Payment ${params.paymentId} not found`)
     notFound();
   }
 

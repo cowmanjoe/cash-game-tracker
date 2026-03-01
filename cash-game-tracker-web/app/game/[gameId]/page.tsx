@@ -5,7 +5,8 @@ import TransferTable from "../transfer-table";
 import { notFound, redirect } from "next/navigation";
 import RoomCodeDisplay from "./room-code-display";
 
-export default async function GamePage({ params }: { params: { gameId: string } }) {
+export default async function GamePage({ params: paramsPromise }: { params: Promise<{ gameId: string }> }) {
+  const params = await paramsPromise;
   const gameResponse = await getGame(params.gameId)
   const transfersResponse = await getTransfers(params.gameId);
 

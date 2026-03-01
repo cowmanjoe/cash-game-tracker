@@ -3,9 +3,10 @@ import { getSession } from "@/app/lib/session";
 import { notFound, redirect } from "next/navigation";
 import AddPaymentForm from "./form";
 
-export default async function AddPaymentPage(props: { params: { gameId: string } }) {
-  const gameResponse = await getGame(props.params.gameId);
-  const balancesResponse = await getBalances(props.params.gameId);
+export default async function AddPaymentPage(props: { params: Promise<{ gameId: string }> }) {
+  const params = await props.params;
+  const gameResponse = await getGame(params.gameId);
+  const balancesResponse = await getBalances(params.gameId);
 
   if (gameResponse.isError) {
     console.error(`Received error: ${gameResponse.error.type}`);
@@ -23,7 +24,7 @@ export default async function AddPaymentPage(props: { params: { gameId: string }
   const sessionPayload = await getSession();
 
   if (!sessionPayload || !game.players[sessionPayload.accountId]) {
-    redirect(`/join-game/${props.params.gameId}`);
+    redirect(`/join-game/${params.gameId}`);
   }
 
   return (

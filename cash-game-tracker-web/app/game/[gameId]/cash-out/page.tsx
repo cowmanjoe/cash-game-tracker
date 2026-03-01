@@ -4,7 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import CashOutForm from "./form";
 import { getSession } from "@/app/lib/session";
 
-export default async function CashOutPage({ params }: { params: { gameId: string } }) {
+export default async function CashOutPage({ params: paramsPromise }: { params: Promise<{ gameId: string }> }) {
+  const params = await paramsPromise;
   const gameResponse = await getGame(params.gameId)
 
   if (gameResponse.isError) {

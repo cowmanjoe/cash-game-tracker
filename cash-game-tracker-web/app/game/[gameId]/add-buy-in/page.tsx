@@ -5,8 +5,9 @@ import { notFound, redirect } from "next/navigation";
 import AddBuyInForm from "./form";
 import { getGame } from "@/app/lib/game-client";
 
-export default async function AddBuyInPage(props: { params: { gameId: string } }) {
-  const gameResponse = await getGame(props.params.gameId);
+export default async function AddBuyInPage(props: { params: Promise<{ gameId: string }> }) {
+  const params = await props.params;
+  const gameResponse = await getGame(params.gameId);
 
   if (gameResponse.isError) {
     console.error(`Received error: ${gameResponse.error.type}`);
@@ -18,7 +19,7 @@ export default async function AddBuyInPage(props: { params: { gameId: string } }
   const sessionPayload = await getSession();
 
   if (!sessionPayload || !game.players[sessionPayload.accountId]) {
-    redirect(`/join-game/${props.params.gameId}`);
+    redirect(`/join-game/${params.gameId}`);
   }
 
   return (

@@ -3,7 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import CashOutForm from "../form";
 import { getSession } from "@/app/lib/session";
 
-export default async function EditCashOutPage({ params }: { params: { gameId: string, accountId: string } }) {
+export default async function EditCashOutPage({ params: paramsPromise }: { params: Promise<{ gameId: string, accountId: string }> }) {
+  const params = await paramsPromise;
   const gameResponse = await getGame(params.gameId)
 
   if (gameResponse.isError) {

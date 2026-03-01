@@ -1,13 +1,15 @@
 import Link from "next/link";
 
 
-export default function GameLayout({
+export default async function GameLayout({
   children,
-  params
+  params: paramsPromise
 }: Readonly<{
   children: React.ReactNode;
-  params: { gameId: string }
+  params: Promise<{ gameId: string }>
 }>) {
+  const params = await paramsPromise;
+
   return (
     <main className="bg-gray-100 min-h-screen flex flex-col">
       {/* Navigation Bar */}

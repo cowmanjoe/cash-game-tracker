@@ -2,8 +2,9 @@ import { getBalances } from "@/app/lib/game-client";
 import { SettlementStatus } from "@/app/lib/game";
 import { notFound } from "next/navigation";
 
-export default async function BalancesPage(props: { params: { gameId: string } }) {
-  const balancesResponse = await getBalances(props.params.gameId)
+export default async function BalancesPage(props: { params: Promise<{ gameId: string }> }) {
+  const params = await props.params;
+  const balancesResponse = await getBalances(params.gameId)
 
   if (balancesResponse.isError) {
     console.error(`Received error: ${balancesResponse.error.type}`)

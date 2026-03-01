@@ -36,7 +36,8 @@ export async function createSession(accountId: string) {
   console.log(`SECURE_COOKIES=${process.env.SECURE_COOKIES}, secureCookies=${secureCookies}`);
   console.log(session);
 
-  cookies().set('session', session, {
+  const cookieStore = await cookies();
+  cookieStore.set('session', session, {
     httpOnly: true,
     secure: secureCookies,
     expires: expiresAt,
@@ -46,7 +47,8 @@ export async function createSession(accountId: string) {
 }
 
 export async function getSession(): Promise<SessionPayload | null> {
-  const session = cookies().get('session')?.value
+  const cookieStore = await cookies();
+  const session = cookieStore.get('session')?.value
   console.log(`retrieved session ${session}`);
 
   const payload = await decrypt(session)
